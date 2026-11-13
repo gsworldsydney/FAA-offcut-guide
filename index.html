@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>프로파일 커팅 가이드 & OFFCUT 재고 관리 시스템</title>
+  <title>OFFCUT & Profile Cutting Guide</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-      background-color: #0f172a;
+      background-color: #0b1120;
       color: #f8fafc;
     }
     .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #1e293b;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #475569;
-      border-radius: 3px;
+      border-radius: 4px;
     }
     .bar-segment {
       transition: all 0.25s ease;
@@ -36,7 +36,7 @@
       }
       .print-card {
         background: white !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #94a3b8 !important;
         color: black !important;
         box-shadow: none !important;
       }
@@ -45,303 +45,388 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Header -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-extrabold text-lg">
+  <!-- Top Header -->
+  <header class="bg-slate-900/95 backdrop-blur border-b border-slate-800 sticky top-0 z-30 no-print">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-extrabold text-xl text-slate-950">
           OC
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            프로파일 커팅 최적화 & OFFCUT 관리
-            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v1.1 색상별 분리</span>
+          <h1 id="headerTitle" class="text-2xl font-extrabold tracking-tight text-white">
+            프로파일 커팅 & OFFCUT 가이드
           </h1>
-          <p class="text-xs text-slate-400">색상별 커팅 목록 분리 관리 · OFFCUT 우선 사용 · 톱날 두께(5mm) 자동 차감</p>
+          <p id="headerSubtitle" class="text-sm text-slate-400">
+            톱날 5mm 차감 · 폐기 ≤1000mm · 권장 오프컷 ≥2000mm
+          </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="openSettingsModal()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition">
-          <span>⚙️ 기준 설정</span>
+      <div class="flex items-center gap-2.5">
+        <!-- Language Toggle Button -->
+        <button onclick="toggleLanguage()" id="langToggleBtn"
+          class="px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-sm font-extrabold flex items-center gap-2 transition">
+          <span>🌐</span>
+          <span id="langToggleText">English</span>
         </button>
-        <button onclick="exportData()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition">
-          <span>💾 백업 저장(JSON)</span>
+
+        <button onclick="openSettingsModal()"
+          class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 transition">
+          <span id="btnSettingsText">⚙️ 기준 설정</span>
         </button>
-        <label class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-1.5 cursor-pointer transition">
-          <span>📂 백업 불러오기</span>
+
+        <button onclick="exportData()"
+          class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 transition">
+          <span id="btnBackupText">💾 백업</span>
+        </button>
+
+        <label class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 cursor-pointer transition">
+          <span id="btnRestoreText">📂 복원</span>
           <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)" />
         </label>
-        <button onclick="window.print()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 transition">
-          🖨️ 작업지시서 인쇄
-        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- Step Navigation Bar -->
+  <nav class="bg-slate-900/60 border-b border-slate-800/80 no-print">
+    <div class="max-w-5xl mx-auto px-6 py-4">
+      <div class="grid grid-cols-3 gap-3 sm:gap-4" id="stepperNav">
+        <!-- Step 1 Button -->
+        <button onclick="goToStep(1)" id="stepBtn1"
+          class="p-4 rounded-2xl border text-left transition flex items-center gap-3.5">
+          <div id="stepNum1" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">1</div>
+          <div class="overflow-hidden">
+            <div id="stepTitle1" class="text-base font-extrabold truncate">작업지시서 입력</div>
+            <div id="stepDesc1" class="text-xs text-slate-400 truncate">색상 선택 및 커팅 길이 추가</div>
+          </div>
+        </button>
 
-    <!-- Left Column: Input & Inventory (5 cols) -->
-    <div class="lg:col-span-5 space-y-6 no-print">
+        <!-- Step 2 Button -->
+        <button onclick="goToStep(2)" id="stepBtn2"
+          class="p-4 rounded-2xl border text-left transition flex items-center gap-3.5">
+          <div id="stepNum2" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">2</div>
+          <div class="overflow-hidden">
+            <div id="stepTitle2" class="text-base font-extrabold truncate">최적 커팅 가이드</div>
+            <div id="stepDesc2" class="text-xs text-slate-400 truncate">원장 추천 확인 및 커팅 확정</div>
+          </div>
+        </button>
 
-      <!-- 1. 작업지시서 입력 카드 -->
-      <section class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span class="w-2 h-5 rounded-full bg-cyan-400"></span>
-            1. 색상별 작업지시서 커팅 입력
-          </h2>
-          <span class="text-xs text-slate-400" id="ruleSummaryBadge">톱날 5mm | 폐기 ≤1000mm | 재사용 ≥2000mm</span>
+        <!-- Step 3 Button -->
+        <button onclick="goToStep(3)" id="stepBtn3"
+          class="p-4 rounded-2xl border text-left transition flex items-center gap-3.5">
+          <div id="stepNum3" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">3</div>
+          <div class="overflow-hidden">
+            <div id="stepTitle3" class="text-base font-extrabold truncate">OFFCUT 재고 관리</div>
+            <div id="stepDesc3" class="text-xs text-slate-400 truncate">보유 오프컷 수정 및 작업 이력</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Wizard Content (Centered, Large & Spacious) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-8">
+
+    <!-- ==================== STEP 1: 작업지시서 입력 ==================== -->
+    <section id="stepView1" class="space-y-8">
+
+      <!-- 1-A. 색상 선택 카드 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400" id="s1StepBadgeA">STEP 1-1</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1SelectColorTitle">
+              프로파일 색상을 선택하세요
+            </h2>
+          </div>
+          <span class="text-sm text-slate-400" id="s1SelectColorHint">
+            색상별로 커팅 목록이 각각 따로 저장됩니다.
+          </span>
         </div>
 
-        <!-- 색상 선택 -->
-        <div class="mb-4">
-          <label class="block text-xs font-semibold text-slate-300 mb-2">
-            프로파일 색상 선택 <span class="text-slate-400 font-normal">(색상별로 대기 목록이 각각 따로 저장됩니다)</span>
-          </label>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="colorSelectorGrid">
-            <!-- JS Rendered -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5" id="colorSelectorGrid">
+          <!-- JS Rendered -->
+        </div>
+      </div>
+
+      <!-- 1-B. 커팅 길이 및 수량 입력 카드 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400" id="s1StepBadgeB">STEP 1-2</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1InputLengthTitle">
+              커팅 길이와 수량을 입력하세요
+            </h2>
+          </div>
+          <div class="px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-sm font-bold text-cyan-300" id="s1StdLengthInfo">
+            표준 원장: 4,700 / 5,700 / 6,700 mm
           </div>
         </div>
 
-        <!-- 단일/개별 추가 입력 -->
-        <div class="bg-slate-900/70 border border-slate-700/70 rounded-xl p-3.5 mb-4">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-cyan-300" id="inputTargetColorTitle">[WHITE] 커팅 치수 추가</span>
-            <span class="text-[11px] text-slate-400" id="inputTargetStdLengths">표준원장: 4,700 / 5,700 / 6,700mm</span>
+        <!-- 큼직한 입력 폼 -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end bg-slate-950/80 border border-slate-800 rounded-2xl p-5 mb-5">
+          <div class="sm:col-span-5">
+            <label class="block text-sm font-bold text-slate-300 mb-2" id="labelCutLength">커팅 길이 (mm)</label>
+            <input type="number" id="cutLengthInput" placeholder="3300" min="100" max="11000" step="1"
+              class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-slate-700 text-white font-extrabold text-xl focus:outline-none focus:border-cyan-400 transition"
+              onkeydown="if(event.key==='Enter') addCutOrderItem()" />
           </div>
-          <div class="grid grid-cols-12 gap-2 items-end">
-            <div class="col-span-5">
-              <label class="block text-xs text-slate-400 mb-1">커팅 길이 (mm)</label>
-              <input type="number" id="cutLengthInput" placeholder="예: 3300" min="100" max="11000" step="1"
-                class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-semibold text-sm focus:outline-none focus:border-cyan-400"
-                onkeydown="if(event.key==='Enter') addCutOrderItem()" />
+          <div class="sm:col-span-3">
+            <label class="block text-sm font-bold text-slate-300 mb-2" id="labelCutQty">수량 (Qty)</label>
+            <input type="number" id="cutQtyInput" value="1" min="1" max="500"
+              class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-slate-700 text-white font-extrabold text-xl focus:outline-none focus:border-cyan-400 transition"
+              onkeydown="if(event.key==='Enter') addCutOrderItem()" />
+          </div>
+          <div class="sm:col-span-4">
+            <button onclick="addCutOrderItem()"
+              class="w-full py-4 px-5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-lg transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2">
+              <span>+</span>
+              <span id="btnAddItemText">목록에 추가</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 빠른 입력 버튼 -->
+        <div class="flex flex-wrap items-center gap-2 mb-8">
+          <span class="text-sm font-semibold text-slate-400 mr-1" id="labelQuickAdd">빠른 테스트 입력:</span>
+          <button onclick="quickAdd(3300, 1)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-semibold transition">
+            3,300mm × 1
+          </button>
+          <button onclick="quickAdd(2200, 2)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
+            2,200mm × 2
+          </button>
+          <button onclick="quickAdd(2500, 1)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
+            2,500mm × 1
+          </button>
+          <button onclick="quickAdd(3100, 2)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
+            3,100mm × 2
+          </button>
+        </div>
+
+        <!-- 현재 선택 색상의 대기 목록 -->
+        <div class="border-t border-slate-800 pt-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-extrabold text-white" id="currentOrderHeaderLabel">
+                [WHITE] 대기 목록 (0건)
+              </h3>
+              <span class="text-xs px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold" id="totalAllColorsOrderBadge">
+                전체 색상 합계 0건
+              </span>
             </div>
-            <div class="col-span-3">
-              <label class="block text-xs text-slate-400 mb-1">수량 (개)</label>
-              <input type="number" id="cutQtyInput" value="1" min="1" max="500"
-                class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-semibold text-sm focus:outline-none focus:border-cyan-400"
-                onkeydown="if(event.key==='Enter') addCutOrderItem()" />
-            </div>
-            <div class="col-span-4">
-              <button onclick="addCutOrderItem()" class="w-full py-2 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition shadow-md shadow-cyan-500/10">
-                + 목록 추가
+            <div class="flex items-center gap-3 text-sm">
+              <button onclick="clearCurrentColorOrderItems()" class="text-rose-400 hover:text-rose-300 font-semibold" id="btnClearCurrentColor">
+                현재 색상 비우기
+              </button>
+              <span class="text-slate-700">|</span>
+              <button onclick="clearAllColorsOrderItems()" class="text-slate-400 hover:text-rose-400 font-semibold" id="btnClearAllColors">
+                전체 색상 비우기
               </button>
             </div>
           </div>
 
-          <!-- 빠른 예시 버튼 -->
-          <div class="mt-3 pt-2.5 border-t border-slate-800 flex flex-wrap items-center gap-1.5">
-            <span class="text-[11px] text-slate-400 mr-1">빠른 입력:</span>
-            <button onclick="quickAdd(3300, 1)" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700">3300mm × 1 (예시)</button>
-            <button onclick="quickAdd(2200, 2)" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">2200mm × 2</button>
-            <button onclick="quickAdd(2500, 1)" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">2500mm × 1</button>
-            <button onclick="quickAdd(3100, 2)" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">3100mm × 2</button>
-          </div>
-        </div>
-
-        <!-- 현재 작업지시 목록 (선택 색상 전용 + 전체 색상 요약) -->
-        <div class="mb-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white" id="currentOrderHeaderLabel">[WHITE] 대기 목록 (<span id="orderCountBadge">0</span>건)</span>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" id="totalAllColorsOrderBadge">전체 색상 합계 0건</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="clearCurrentColorOrderItems()" class="text-xs text-rose-400 hover:text-rose-300">현재 색상 비우기</button>
-              <span class="text-slate-600">|</span>
-              <button onclick="clearAllColorsOrderItems()" class="text-xs text-slate-400 hover:text-rose-400">전체 비우기</button>
-            </div>
-          </div>
-
-          <!-- 현재 선택된 색상의 대기 목록 -->
-          <div id="orderItemsContainer" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+          <div id="orderItemsContainer" class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
             <!-- JS Rendered -->
           </div>
 
-          <!-- 다른 색상에 입력되어 있는 대기 목록 요약 바 -->
-          <div id="otherColorsOrderSummary" class="mt-2.5 pt-2.5 border-t border-slate-700/70 hidden">
+          <!-- 다른 색상에 입력된 대기 목록 요약 -->
+          <div id="otherColorsOrderSummary" class="mt-5 pt-4 border-t border-slate-800/80 hidden">
             <!-- JS Rendered -->
           </div>
         </div>
+      </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="generateCuttingGuide('SINGLE')" class="py-3 px-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs tracking-wide transition flex items-center justify-center gap-1.5">
-            <span>🔍 현재 색상만 가이드 보기</span>
+      <!-- STEP 1 하단 대형 이동 버튼 -->
+      <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-2">
+        <button onclick="startGuideFromStep1('SINGLE')"
+          class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 transition">
+          <span id="btnCalcSingleColor">🔍 현재 색상만 가이드 보기 →</span>
+        </button>
+        <button onclick="startGuideFromStep1('ALL')"
+          class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-extrabold text-lg shadow-xl shadow-cyan-500/20 transition">
+          <span id="btnCalcAllColors">⚡ 다음 단계: 최적 커팅 가이드 확인 →</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ==================== STEP 2: 최적 커팅 가이드 결과 ==================== -->
+    <section id="stepView2" class="hidden space-y-8">
+
+      <!-- 상단 네비 & 인쇄/확정 액션 바 -->
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl no-print">
+        <button onclick="goToStep(1)"
+          class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+          <span id="btnBackToStep1">← 1단계: 커팅 치수 수정하기</span>
+        </button>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="window.print()"
+            class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 transition">
+            <span id="btnPrintGuide">🖨️ 작업지시서 인쇄</span>
           </button>
-          <button onclick="generateCuttingGuide('ALL')" class="py-3 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-extrabold text-xs tracking-wide shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-1.5">
-            <span>⚡ 대기 중인 모든 색상 가이드</span>
-          </button>
+
+          <div id="applyActionArea" class="hidden">
+            <button onclick="applyCuttingPlan()"
+              class="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base shadow-lg shadow-emerald-500/25 transition">
+              <span id="applyPlanBtnLabel">✅ 가이드대로 커팅 확정 (재고 반영)</span>
+            </button>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <!-- 2. 현재 재고 관리 (OFFCUT + 원장) -->
-      <section class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
+      <!-- KPI 요약 카드 (큼직하게 표시) -->
+      <div id="guideSummaryKPIs" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- JS Rendered -->
+      </div>
+
+      <!-- 왜 이 원장이 선택되었는지 비교 분석 박스 -->
+      <div id="singleComparisonBox" class="hidden bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl no-print">
+        <!-- JS Rendered -->
+      </div>
+
+      <!-- 커팅 바 시각화 리스트 -->
+      <div id="cuttingPlanContainer" class="space-y-6 print-card">
+        <!-- JS Rendered -->
+      </div>
+
+    </section>
+
+    <!-- ==================== STEP 3: OFFCUT 재고 & 이력 관리 ==================== -->
+    <section id="stepView3" class="hidden space-y-8">
+
+      <!-- 3-A. 전체 색상 오프컷 한눈에 보기 (클릭하여 색상 선택) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
           <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-5 rounded-full bg-emerald-400"></span>
-              2. 재고 현황 및 관리
+            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400" id="s3BadgeOverview">INVENTORY OVERVIEW</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s3OverviewTitle">
+              전체 색상 OFFCUT 보유 현황
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">선택된 색상(<span id="currentColorLabel" class="text-cyan-300 font-semibold">WHITE</span>) 기준 재고입니다.</p>
           </div>
-          <div class="flex rounded-lg bg-slate-900 p-0.5 border border-slate-700 text-xs">
-            <button id="tabBtnOffcut" onclick="switchStockTab('offcut')" class="px-2.5 py-1 rounded-md font-semibold bg-emerald-500 text-slate-950 transition">
+          <span class="text-sm text-slate-400" id="s3OverviewHint">
+            색상 카드를 클릭하면 아래에서 해당 색상의 재고를 직접 추가/수정할 수 있습니다.
+          </span>
+        </div>
+
+        <div id="allColorOffcutOverview" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- JS Rendered -->
+        </div>
+      </div>
+
+      <!-- 3-B. 선택된 색상 상세 재고 관리 (OFFCUT 수동 등록 & 표준 원장 설정) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+              <span id="s3SelectedColorStockTitle">[WHITE] 재고 상세 관리</span>
+            </h3>
+          </div>
+          <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-sm">
+            <button id="tabBtnOffcut" onclick="switchStockTab('offcut')" class="px-4 py-2 rounded-lg font-extrabold bg-emerald-500 text-slate-950 transition">
               OFFCUT 재고
             </button>
-            <button id="tabBtnRaw" onclick="switchStockTab('raw')" class="px-2.5 py-1 rounded-md font-semibold text-slate-400 hover:text-white transition">
-              신규 원장(표준)
+            <button id="tabBtnRaw" onclick="switchStockTab('raw')" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition">
+              표준 원장(신규)
             </button>
           </div>
         </div>
 
-        <!-- OFFCUT 재고 탭 -->
-        <div id="stockTabOffcut" class="space-y-3">
-          <div class="bg-slate-900/70 border border-slate-700/70 rounded-xl p-3">
-            <div class="text-xs font-semibold text-emerald-300 mb-2">+ 기존 보유 OFFCUT 수동 등록 (<span id="offcutAddColorLabel">WHITE</span>)</div>
-            <div class="grid grid-cols-12 gap-2">
-              <div class="col-span-5">
-                <input type="number" id="manualOffcutLen" placeholder="길이 (예: 3400)" min="500" max="11000"
-                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-white text-xs focus:outline-none focus:border-emerald-400" />
+        <!-- OFFCUT 수동 추가 및 목록 -->
+        <div id="stockTabOffcut" class="space-y-5">
+          <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-5">
+            <div class="text-sm font-bold text-emerald-300 mb-3" id="s3ManualAddTitle">
+              + 보유 중인 OFFCUT 수동 등록
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+              <div class="sm:col-span-5">
+                <label class="block text-xs text-slate-400 mb-1" id="s3LabelOffcutLen">오프컷 길이 (mm)</label>
+                <input type="number" id="manualOffcutLen" placeholder="3400" min="500" max="11000"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-base focus:outline-none focus:border-emerald-400" />
               </div>
-              <div class="col-span-3">
+              <div class="sm:col-span-3">
+                <label class="block text-xs text-slate-400 mb-1" id="s3LabelOffcutQty">수량 (Qty)</label>
                 <input type="number" id="manualOffcutQty" value="1" min="1" max="999"
-                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-white text-xs focus:outline-none focus:border-emerald-400" />
+                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-base focus:outline-none focus:border-emerald-400" />
               </div>
-              <div class="col-span-4">
-                <button onclick="addManualOffcut()" class="w-full py-1.5 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
-                  오프컷 추가
+              <div class="sm:col-span-4">
+                <button onclick="addManualOffcut()"
+                  class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base transition">
+                  <span id="s3BtnAddOffcut">+ 오프컷 등록</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <div id="offcutListContainer" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+          <div id="offcutListContainer" class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
             <!-- JS Rendered -->
           </div>
         </div>
 
-        <!-- 원장(표준 프로파일) 재고 탭 -->
-        <div id="stockTabRaw" class="hidden space-y-3">
-          <div class="flex items-center justify-between bg-slate-900/80 border border-slate-700/70 rounded-xl px-3.5 py-2.5">
+        <!-- 표준 원장 수량 관리 -->
+        <div id="stockTabRaw" class="hidden space-y-4">
+          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-4">
             <div>
-              <div class="text-xs font-semibold text-slate-200">원장 수량 제한 모드</div>
-              <div class="text-[11px] text-slate-400">끄면 표준 원장(4700/5700/6700/11000)을 무제한 보유로 가정합니다.</div>
+              <div class="text-base font-bold text-slate-200" id="s3RawLimitTitle">표준 원장 수량 제한 사용</div>
+              <div class="text-xs text-slate-400 mt-0.5" id="s3RawLimitDesc">해제 시 표준 원장(4700/5700/6700/11000)은 상시 무제한 보유로 계산합니다.</div>
             </div>
-            <input type="checkbox" id="useRawStockLimitToggle" onchange="toggleRawStockLimit()" class="w-4 h-4 accent-cyan-400 cursor-pointer" />
+            <input type="checkbox" id="useRawStockLimitToggle" onchange="toggleRawStockLimit()" class="w-5 h-5 accent-cyan-400 cursor-pointer" />
           </div>
-          <div id="rawStockListContainer" class="space-y-2">
+          <div id="rawStockListContainer" class="space-y-2.5">
             <!-- JS Rendered -->
           </div>
         </div>
-      </section>
-    </div>
+      </div>
 
-    <!-- Right Column: Cutting Guide & Simulation & History (7 cols) -->
-    <div class="lg:col-span-7 space-y-6">
-
-      <!-- 3. 최적 커팅 가이드 결과 -->
-      <section class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-xl print-card">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <span class="w-2.5 h-6 rounded-full bg-indigo-400 no-print"></span>
-              3. 색상별 최적 프로파일 커팅 가이드
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5" id="guideSubtitle">
-              색상별로 입력된 커팅 길이에 맞춰 가장 효율적인 프로파일과 예상 오프컷을 안내합니다.
-            </p>
-          </div>
-          <div id="applyActionArea" class="hidden no-print flex items-center gap-2">
-            <button onclick="applyCuttingPlan()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
-              <span id="applyPlanBtnLabel">✅ 가이드대로 커팅 확정 (재고 반영)</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 요약 KPI 배지 -->
-        <div id="guideSummaryKPIs" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          <!-- JS Rendered -->
-        </div>
-
-        <!-- 단일 컷 비교 분석 -->
-        <div id="singleComparisonBox" class="hidden mb-5 bg-slate-900/90 border border-slate-700 rounded-xl p-4">
-          <!-- JS Rendered -->
-        </div>
-
-        <!-- 커팅 바 시각화 리스트 -->
-        <div id="cuttingPlanContainer" class="space-y-5">
-          <div class="text-center py-12 text-slate-500 border border-dashed border-slate-700 rounded-xl">
-            <div class="text-3xl mb-2">📏</div>
-            <div class="text-sm font-medium text-slate-300">아직 계산된 커팅 가이드가 없습니다.</div>
-            <div class="text-xs text-slate-500 mt-1">색상을 선택하고 커팅 길이를 입력해 보세요!</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. 전체 색상 한눈에 보기 & 최근 작업 이력 -->
-      <section class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-xl no-print">
+      <!-- 3-C. 최근 커팅 작업 확정 이력 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span class="w-2 h-5 rounded-full bg-amber-400"></span>
-            4. 전체 색상 OFFCUT 현황 & 커팅 이력
-          </h2>
-          <button onclick="clearHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition">이력 초기화</button>
+          <h3 class="text-lg font-extrabold text-white" id="s3HistoryTitle">최근 커팅 확정 기록</h3>
+          <button onclick="clearHistory()" class="text-sm text-slate-400 hover:text-rose-400 font-semibold transition" id="s3BtnClearHistory">
+            기록 초기화
+          </button>
         </div>
-
-        <!-- 전체 색상 오프컷 요약 그리드 -->
-        <div id="allColorOffcutOverview" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 mb-5">
+        <div id="historyLogContainer" class="space-y-2.5 max-h-72 overflow-y-auto custom-scrollbar pr-1">
           <!-- JS Rendered -->
         </div>
+      </div>
 
-        <!-- 최근 작업 확정 로그 -->
-        <div>
-          <div class="text-xs font-semibold text-slate-300 mb-2">최근 커팅 확정 기록</div>
-          <div id="historyLogContainer" class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1">
-            <!-- JS Rendered -->
-          </div>
-        </div>
-      </section>
+    </section>
 
-    </div>
   </main>
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base font-bold text-white">⚙️ 커팅 및 오프컷 기준 설정</h3>
-        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-7 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-xl font-extrabold text-white" id="modalSettingsTitle">⚙️ 커팅 및 오프컷 기준 설정</h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
       </div>
-      <div class="space-y-4 text-xs">
+      <div class="space-y-5 text-sm">
         <div>
-          <label class="block font-semibold text-slate-200 mb-1">커팅날 두께 (Kerf, mm)</label>
+          <label class="block font-bold text-slate-200 mb-1.5" id="modalLabelKerf">커팅날 두께 (Blade Kerf, mm)</label>
           <input type="number" id="settingKerf" value="5" min="0" max="50"
-            class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-semibold" />
-          <p class="text-[11px] text-slate-400 mt-1">1회 절단 시 소모되는 날 두께입니다. (기본값: 5mm)</p>
+            class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white font-bold text-base" />
         </div>
         <div>
-          <label class="block font-semibold text-slate-200 mb-1">폐기 기준 잔여 길이 (Scrap Threshold, mm 이하)</label>
+          <label class="block font-bold text-slate-200 mb-1.5" id="modalLabelScrap">폐기 기준 잔여 길이 (Scrap Threshold, ≤ mm)</label>
           <input type="number" id="settingScrapMax" value="1000" min="0" max="5000"
-            class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-semibold" />
-          <p class="text-[11px] text-slate-400 mt-1">커팅 후 남은 길이가 이 값 이하이면 재고로 잡지 않고 즉시 폐기(Scrap)합니다. (기본값: 1000mm)</p>
+            class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white font-bold text-base" />
         </div>
         <div>
-          <label class="block font-semibold text-slate-200 mb-1">권장 재사용 최소 커팅 너비 (Usable Offcut Min, mm 이상)</label>
+          <label class="block font-bold text-slate-200 mb-1.5" id="modalLabelUsable">권장 재사용 최소 길이 (Min Usable Offcut, ≥ mm)</label>
           <input type="number" id="settingUsableMin" value="2000" min="500" max="6000"
-            class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-semibold" />
-          <p class="text-[11px] text-slate-400 mt-1">
-            최소 커팅 너비 기준입니다. 잔여 길이가 폐기 기준(1000mm)을 초과하더라도 이 값(2000mm) 미만이면 다음 작업에 쓰기 애매한 자투리가 되므로, 알고리즘이 이를 피하고 2000mm 이상 남는 원장(예: 3300 커팅 시 4700 대신 6700 선택 → 3395 남김)을 우선 추천합니다.
-          </p>
+            class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white font-bold text-base" />
         </div>
-        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
-          <button onclick="resetAllData()" class="px-3 py-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-semibold">
-            초기 데이터로 리셋
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+          <button onclick="resetAllData()" id="modalBtnReset"
+            class="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold">
+            초기화 (Reset)
           </button>
-          <div class="flex gap-2">
-            <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 font-semibold">취소</button>
-            <button onclick="saveSettings()" class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold">저장 및 적용</button>
+          <div class="flex gap-2.5">
+            <button onclick="closeSettingsModal()" id="modalBtnCancel" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold">취소</button>
+            <button onclick="saveSettings()" id="modalBtnSave" class="px-5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-extrabold">저장</button>
           </div>
         </div>
       </div>
@@ -349,15 +434,214 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-xl bg-slate-900 border border-cyan-500/50 text-white text-xs font-semibold shadow-2xl flex items-center gap-2 no-print">
+  <div id="toastBox" class="fixed bottom-6 right-6 z-50 hidden px-5 py-4 rounded-2xl bg-slate-900 border-2 border-cyan-400 text-white text-sm font-extrabold shadow-2xl flex items-center gap-2.5 no-print">
     <span id="toastMsg">알림</span>
   </div>
 
   <script>
     /*************************************************************************
-     * 1. 기본 상수 및 초기 상태 정의 (색상별 커팅 대기 목록 분리 저장)
+     * 1. 다국어(KO / EN) 번역 사전 및 상수 정의
      *************************************************************************/
-    const STORAGE_KEY = 'OFFCUT_MANAGER_STATE_V2';
+    const STORAGE_KEY = 'OFFCUT_MANAGER_STATE_V3';
+
+    const I18N = {
+      ko: {
+        headerTitle: '프로파일 커팅 & OFFCUT 가이드',
+        headerSubtitle: (kerf, scrap, usable) => `톱날 두께 ${kerf}mm 차감 · 잔여 ≤${scrap}mm 폐기 · 권장 오프컷 ≥${usable}mm`,
+        langToggleText: 'English',
+        btnSettingsText: '⚙️ 기준 설정',
+        btnBackupText: '💾 백업',
+        btnRestoreText: '📂 복원',
+        stepTitle1: '1. 작업지시서 입력',
+        stepDesc1: '색상 선택 및 커팅 치수 추가',
+        stepTitle2: '2. 최적 커팅 가이드',
+        stepDesc2: '원장 추천 확인 및 커팅 확정',
+        stepTitle3: '3. OFFCUT 재고 관리',
+        stepDesc3: '보유 오프컷 수정 및 이력',
+        s1SelectColorTitle: '프로파일 색상을 선택하세요',
+        s1SelectColorHint: '색상별로 커팅 대기 목록이 각각 따로 저장됩니다.',
+        s1InputLengthTitle: (colorName) => `[${colorName}] 커팅 길이와 수량을 입력하세요`,
+        s1StdLengthInfo: (lens) => `표준 원장: ${lens} mm`,
+        labelCutLength: '커팅 길이 (mm)',
+        labelCutQty: '수량 (개)',
+        btnAddItemText: '목록에 추가',
+        labelQuickAdd: '빠른 입력:',
+        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] 대기 목록 (${count}건)`,
+        totalAllColorsOrderBadge: (total) => `전체 색상 합계 ${total}건`,
+        btnClearCurrentColor: '현재 색상 비우기',
+        btnClearAllColors: '전체 비우기',
+        emptyColorOrder: (colorName) => `현재 ${colorName} 색상에 입력된 커팅 목록이 없습니다.`,
+        otherColorsSummaryLabel: '다른 색상에 대기 중인 커팅 목록 (클릭하여 전환):',
+        btnCalcSingleColor: '🔍 현재 색상만 가이드 보기 →',
+        btnCalcAllColors: '⚡ 다음 단계: 최적 커팅 가이드 확인 →',
+        btnBackToStep1: '← 1단계: 커팅 치수 수정하기',
+        btnPrintGuide: '🖨️ 작업지시서 인쇄',
+        applyAllBtn: (cnt) => `✅ 표시된 ${cnt}개 색상 전체 커팅 확정 (재고 반영)`,
+        applySingleBtn: (color) => `✅ [${color}] 가이드대로 커팅 확정 (재고 반영)`,
+        kpiUsedOffcut: '우선 사용하는 OFFCUT',
+        kpiUsedRaw: '신규 투입 표준 원장',
+        kpiNewOffcut: '새로 남는 보관용 오프컷',
+        kpiScrapLoss: (scrap) => `폐기 손실 (≤${scrap}mm)`,
+        unitPcs: '개',
+        compTitle: (color, len) => `💡 [${color}] ${len.toLocaleString()}mm 커팅 시 왜 이 원장이 선택되었나요?`,
+        compKerfNote: (kerf) => `톱날 ${kerf}mm 차감 반영`,
+        compRecommended: '추천 선택',
+        compRemainder: (rem, kerf) => `잔여: ${rem.toLocaleString()}mm (날 ${kerf}mm)`,
+        sourceOffcut: '♻️ 1순위: 보유 OFFCUT 사용',
+        sourceRaw: '📏 신규 표준 프로파일 사용',
+        sourceShortOffcut: '♻️ 오프컷 ',
+        sourceShortRaw: '📏 원장 ',
+        sameWorkCount: (cnt) => `동일 작업 × ${cnt}본`,
+        cutDetailsLabel: '✂️ 커팅 내역:',
+        kerfDetailsLabel: '⚙️ 톱날 소모:',
+        cutsUnit: '컷',
+        timesUnit: '회',
+        btnApplyThisColorOnly: (color) => `✓ ${color}만 먼저 확정`,
+        guideSectionTitle: (color, korName) => `${color} (${korName}) 커팅 가이드`,
+        guideTotalBars: (cnt) => `총 ${cnt}본 작업`,
+        unfulfilledTitle: '⚠️ 커팅 불가능한 치수가 있습니다!',
+        unfulfilledDesc: '최대 원장 길이 초과 또는 재고 부족:',
+        noGuideYetTitle: '대기 중인 커팅 목록이 없습니다.',
+        noGuideYetDesc: '1단계에서 색상을 선택하고 커팅 길이를 추가해 주세요.',
+        s3OverviewTitle: '전체 색상 OFFCUT 보유 현황',
+        s3OverviewHint: '색상 카드를 클릭하면 아래에서 해당 색상의 재고를 직접 추가/수정할 수 있습니다.',
+        s3SelectedColorStockTitle: (color) => `[${color}] 재고 상세 관리`,
+        tabOffcut: 'OFFCUT 재고',
+        tabRaw: '표준 원장(신규)',
+        s3ManualAddTitle: (color) => `+ [${color}] 보유 중인 OFFCUT 수동 등록`,
+        s3LabelOffcutLen: '오프컷 길이 (mm)',
+        s3LabelOffcutQty: '수량 (개)',
+        s3BtnAddOffcut: '+ 오프컷 등록',
+        s3RawLimitTitle: '표준 원장 수량 제한 사용',
+        s3RawLimitDesc: '해제 시 표준 원장(4700/5700/6700/11000)은 상시 무제한 보유로 계산합니다.',
+        rawUnlimited: '상시 보유 (무제한)',
+        rawStdLabel: '표준 원장',
+        s3HistoryTitle: '최근 커팅 확정 기록',
+        s3BtnClearHistory: '기록 초기화',
+        emptyOffcutStock: (color) => `현재 ${color} 색상의 보유 OFFCUT 재고가 없습니다.`,
+        emptyHistory: '아직 확정된 커팅 작업 이력이 없습니다.',
+        badgeWaitCuts: (cnt) => `대기 ${cnt}컷`,
+        badgeOffcutCnt: (cnt) => `오프컷 ${cnt}`,
+        noOffcuts: '보유 오프컷 없음',
+        belowMinWidth: (min) => `최소너비(${min}) 미만`,
+        remNewOffcut: '신규 오프컷 보관',
+        remScrap: (max) => `폐기 (≤${max})`,
+        remAwkward: (min) => `오프컷 (${min}미만)`,
+        outPerfect: '잔여 0mm (완벽 소진)',
+        outScrap: (rem, max) => `잔여 ${rem.toLocaleString()}mm → 폐기 (≤${max}mm)`,
+        outUsable: (rem) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 재고 등록 (재사용 우수)`,
+        outAwkward: (rem, min) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 등록 (${min}mm 미만)`,
+        reasonPerfect: '잔여 없이 완벽 소진',
+        reasonScrap: (rem, max) => `잔여 ${rem}mm (≤${max}mm 폐기)`,
+        reasonUsable: (rem, min) => `잔여 ${rem}mm (≥${min}mm 재사용 가능 오프컷)`,
+        reasonAwkward: (rem, min) => `잔여 ${rem}mm (${min}mm 미만으로 재사용 어려움 · 비추천)`,
+        modalSettingsTitle: '⚙️ 커팅 및 오프컷 기준 설정',
+        modalLabelKerf: '커팅날 두께 (Blade Kerf, mm)',
+        modalLabelScrap: '폐기 기준 잔여 길이 (Scrap Threshold, ≤ mm)',
+        modalLabelUsable: '권장 재사용 최소 길이 (Min Usable Offcut, ≥ mm)',
+        modalBtnReset: '초기화 (Reset)',
+        modalBtnCancel: '취소',
+        modalBtnSave: '저장'
+      },
+      en: {
+        headerTitle: 'Profile Cutting & OFFCUT Guide',
+        headerSubtitle: (kerf, scrap, usable) => `Blade Kerf ${kerf}mm · Scrap ≤${scrap}mm · Recommended Offcut ≥${usable}mm`,
+        langToggleText: '한국어',
+        btnSettingsText: '⚙️ Settings',
+        btnBackupText: '💾 Backup',
+        btnRestoreText: '📂 Restore',
+        stepTitle1: '1. Work Order Input',
+        stepDesc1: 'Select color & enter cut lengths',
+        stepTitle2: '2. Optimal Cutting Guide',
+        stepDesc2: 'Review bar selection & confirm cuts',
+        stepTitle3: '3. OFFCUT Inventory',
+        stepDesc3: 'Manage offcut stock & history',
+        s1SelectColorTitle: 'Select Profile Color / Finish',
+        s1SelectColorHint: 'Cutting queues are saved separately for each color.',
+        s1InputLengthTitle: (colorName) => `Add Cut Length & Quantity for [${colorName}]`,
+        s1StdLengthInfo: (lens) => `Standard Stock: ${lens} mm`,
+        labelCutLength: 'Cut Length (mm)',
+        labelCutQty: 'Quantity (pcs)',
+        btnAddItemText: 'Add to Queue',
+        labelQuickAdd: 'Quick Add:',
+        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] Cutting Queue (${count} pcs)`,
+        totalAllColorsOrderBadge: (total) => `All Colors Total: ${total} pcs`,
+        btnClearCurrentColor: 'Clear Current Color',
+        btnClearAllColors: 'Clear All Colors',
+        emptyColorOrder: (colorName) => `No cutting items queued for ${colorName}.`,
+        otherColorsSummaryLabel: 'Pending queues in other colors (click to switch):',
+        btnCalcSingleColor: '🔍 View Guide for Current Color Only →',
+        btnCalcAllColors: '⚡ Next Step: View Optimal Cutting Guide →',
+        btnBackToStep1: '← Step 1: Edit Cut Lengths',
+        btnPrintGuide: '🖨️ Print Work Order',
+        applyAllBtn: (cnt) => `✅ Confirm All ${cnt} Colors & Update Stock`,
+        applySingleBtn: (color) => `✅ Confirm [${color}] Cuts & Update Stock`,
+        kpiUsedOffcut: 'Existing OFFCUTs Used',
+        kpiUsedRaw: 'New Standard Bars Used',
+        kpiNewOffcut: 'New Reusable OFFCUTs',
+        kpiScrapLoss: (scrap) => `Scrap Loss (≤${scrap}mm)`,
+        unitPcs: 'pcs',
+        compTitle: (color, len) => `💡 Why was this profile selected for [${color}] ${len.toLocaleString()}mm?`,
+        compKerfNote: (kerf) => `${kerf}mm blade kerf applied`,
+        compRecommended: 'BEST CHOICE',
+        compRemainder: (rem, kerf) => `Remainder: ${rem.toLocaleString()}mm (Kerf ${kerf}mm)`,
+        sourceOffcut: '♻️ Priority 1: Use Existing OFFCUT',
+        sourceRaw: '📏 Use New Standard Profile',
+        sourceShortOffcut: '♻️ Offcut ',
+        sourceShortRaw: '📏 Stock ',
+        sameWorkCount: (cnt) => `Repeat × ${cnt} bar(s)`,
+        cutDetailsLabel: '✂️ Cuts:',
+        kerfDetailsLabel: '⚙️ Blade Kerf:',
+        cutsUnit: 'cut(s)',
+        timesUnit: 'cut(s)',
+        btnApplyThisColorOnly: (color) => `✓ Confirm ${color} Only`,
+        guideSectionTitle: (color) => `${color} Cutting Guide`,
+        guideTotalBars: (cnt) => `Total ${cnt} bar(s)`,
+        unfulfilledTitle: '⚠️ Uncuttable Lengths Detected!',
+        unfulfilledDesc: 'Exceeds max profile length or insufficient stock:',
+        noGuideYetTitle: 'No cutting items in queue.',
+        noGuideYetDesc: 'Please go to Step 1 and add cut lengths.',
+        s3OverviewTitle: 'All Colors OFFCUT Inventory',
+        s3OverviewHint: 'Click any color card below to add or edit its offcut stock.',
+        s3SelectedColorStockTitle: (color) => `[${color}] Stock Management`,
+        tabOffcut: 'OFFCUT Stock',
+        tabRaw: 'Standard Bars',
+        s3ManualAddTitle: (color) => `+ Manually Add [${color}] OFFCUT`,
+        s3LabelOffcutLen: 'Offcut Length (mm)',
+        s3LabelOffcutQty: 'Quantity (pcs)',
+        s3BtnAddOffcut: '+ Add Offcut',
+        s3RawLimitTitle: 'Limit Standard Bar Quantities',
+        s3RawLimitDesc: 'When unchecked, standard profiles (4700/5700/6700/11000) are assumed unlimited.',
+        rawUnlimited: 'Unlimited Stock',
+        rawStdLabel: 'Standard Bar',
+        s3HistoryTitle: 'Recent Confirmed Cutting History',
+        s3BtnClearHistory: 'Clear History',
+        emptyOffcutStock: (color) => `No OFFCUT stock currently registered for ${color}.`,
+        emptyHistory: 'No confirmed cutting history yet.',
+        badgeWaitCuts: (cnt) => `Queue ${cnt}`,
+        badgeOffcutCnt: (cnt) => `Offcut ${cnt}`,
+        noOffcuts: 'No offcuts in stock',
+        belowMinWidth: (min) => `Below min (${min}mm)`,
+        remNewOffcut: 'Save as Offcut',
+        remScrap: (max) => `Scrap (≤${max})`,
+        remAwkward: (min) => `Offcut (<${min})`,
+        outPerfect: 'Remainder 0mm (Zero Waste)',
+        outScrap: (rem, max) => `Rem ${rem.toLocaleString()}mm → Scrap (≤${max}mm)`,
+        outUsable: (rem) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (Reusable)`,
+        outAwkward: (rem, min) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (<${min}mm)`,
+        reasonPerfect: 'Zero waste!',
+        reasonScrap: (rem, max) => `Rem ${rem}mm (Scrap ≤${max}mm)`,
+        reasonUsable: (rem, min) => `Rem ${rem}mm (Reusable Offcut ≥${min}mm)`,
+        reasonAwkward: (rem, min) => `Rem ${rem}mm (Hard to reuse <${min}mm · Avoid)`,
+        modalSettingsTitle: '⚙️ Cutting & Offcut Rules',
+        modalLabelKerf: 'Blade Kerf Thickness (mm)',
+        modalLabelScrap: 'Scrap Threshold (Discard if ≤ mm)',
+        modalLabelUsable: 'Recommended Min Reusable Offcut (≥ mm)',
+        modalBtnReset: 'Reset All Data',
+        modalBtnCancel: 'Cancel',
+        modalBtnSave: 'Save'
+      }
+    };
 
     const PROFILE_COLORS = [
       {
@@ -395,7 +679,7 @@
       {
         id: 'MILL FINISH',
         name: 'MILL FINISH',
-        korName: '밀 피니쉬 (11,000)',
+        korName: '밀 피니쉬',
         badgeClass: 'bg-gradient-to-r from-slate-300 to-zinc-400 text-slate-950 border-slate-300',
         dotClass: 'bg-zinc-300',
         standardLengths: [11000]
@@ -408,28 +692,29 @@
       const ordersByColor = {};
 
       PROFILE_COLORS.forEach(c => {
-        offcuts[c.id] = []; // [{ id, length, qty }]
+        offcuts[c.id] = [];
         rawStocks[c.id] = {};
-        ordersByColor[c.id] = []; // 색상별 대기 커팅 목록 [{ id, length, qty }]
+        ordersByColor[c.id] = [];
         c.standardLengths.forEach(len => {
           rawStocks[c.id][len] = 50;
         });
       });
 
-      // 초기 예시: WHITE에 3300mm 1개
       ordersByColor['WHITE'] = [
         { id: 'init-1', length: 3300, qty: 1 }
       ];
 
       return {
+        lang: 'ko',       // 'ko' | 'en'
+        currentStep: 1,   // 1 | 2 | 3
         selectedColor: 'WHITE',
         guideMode: 'ALL', // 'SINGLE' | 'ALL'
         stockTab: 'offcut',
         useRawStockLimit: false,
         settings: {
-          kerf: 5,          // 커팅날 두께 5mm
-          scrapMax: 1000,   // 1000mm 이하 폐기
-          usableMin: 2000   // 최소 커팅 너비 2000mm
+          kerf: 5,
+          scrapMax: 1000,
+          usableMin: 2000
         },
         offcuts,
         rawStocks,
@@ -439,22 +724,22 @@
     }
 
     let state = loadState();
-    let currentCalculatedPlans = []; // [{ colorId, steps, unfulfilled, singleComparisons }]
+    let currentCalculatedPlans = [];
+
+    function t() {
+      return I18N[state.lang] || I18N.ko;
+    }
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('OFFCUT_MANAGER_STATE_V1');
+        const raw = localStorage.getItem(STORAGE_KEY)
+          || localStorage.getItem('OFFCUT_MANAGER_STATE_V2')
+          || localStorage.getItem('OFFCUT_MANAGER_STATE_V1');
         if (!raw) return getDefaultState();
         const parsed = JSON.parse(raw);
         const def = getDefaultState();
 
-        // 이전 버전(v1)의 단일 currentOrder 호환 마이그레이션
         const migratedOrdersByColor = { ...def.ordersByColor, ...(parsed.ordersByColor || {}) };
-        if (!parsed.ordersByColor && Array.isArray(parsed.currentOrder) && parsed.currentOrder.length > 0) {
-          const targetCol = parsed.selectedColor || 'WHITE';
-          migratedOrdersByColor[targetCol] = parsed.currentOrder;
-        }
-
         PROFILE_COLORS.forEach(c => {
           if (!Array.isArray(migratedOrdersByColor[c.id])) {
             migratedOrdersByColor[c.id] = [];
@@ -464,13 +749,14 @@
         return {
           ...def,
           ...parsed,
+          lang: parsed.lang || 'ko',
+          currentStep: parsed.currentStep || 1,
           settings: { ...def.settings, ...(parsed.settings || {}) },
           offcuts: { ...def.offcuts, ...(parsed.offcuts || {}) },
           rawStocks: { ...def.rawStocks, ...(parsed.rawStocks || {}) },
           ordersByColor: migratedOrdersByColor
         };
       } catch (e) {
-        console.error('Failed to load state:', e);
         return getDefaultState();
       }
     }
@@ -495,9 +781,7 @@
     }
 
     function getColorOrders(colorId) {
-      if (!state.ordersByColor[colorId]) {
-        state.ordersByColor[colorId] = [];
-      }
+      if (!state.ordersByColor[colorId]) state.ordersByColor[colorId] = [];
       return state.ordersByColor[colorId];
     }
 
@@ -510,7 +794,63 @@
     }
 
     /*************************************************************************
-     * 2. 핵심 커팅 최적화 알고리즘 (OFFCUT 우선 + 애매한 잔여길이 방지 + 다중 컷 조합)
+     * 2. 언어 전환 & 단계(Step) 전환
+     *************************************************************************/
+    function toggleLanguage() {
+      state.lang = state.lang === 'ko' ? 'en' : 'ko';
+      saveState();
+      renderAll();
+      if (state.currentStep === 2) {
+        generateCuttingGuide(state.guideMode);
+      }
+    }
+
+    function goToStep(stepNum) {
+      state.currentStep = stepNum;
+      saveState();
+      renderStepperAndViews();
+      if (stepNum === 2) {
+        generateCuttingGuide(state.guideMode);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startGuideFromStep1(mode) {
+      state.guideMode = mode;
+      const count = mode === 'SINGLE'
+        ? getTotalOrderPiecesForColor(state.selectedColor)
+        : getTotalOrderPiecesAllColors();
+
+      if (count === 0) {
+        showToast(state.lang === 'ko'
+          ? '먼저 커팅할 길이와 수량을 1개 이상 추가해 주세요!'
+          : 'Please add at least one cut length to the queue first!');
+        return;
+      }
+      goToStep(2);
+    }
+
+    function renderStepperAndViews() {
+      const step = state.currentStep || 1;
+      [1, 2, 3].forEach(n => {
+        const view = document.getElementById(`stepView${n}`);
+        const btn = document.getElementById(`stepBtn${n}`);
+        const numBox = document.getElementById(`stepNum${n}`);
+
+        if (n === step) {
+          view.classList.remove('hidden');
+          btn.className = 'p-4 rounded-2xl border-2 border-cyan-400 bg-indigo-950/50 text-white transition flex items-center gap-3.5 shadow-lg shadow-cyan-500/10';
+          numBox.className = 'w-10 h-10 rounded-xl bg-cyan-400 text-slate-950 flex items-center justify-center font-extrabold text-lg shrink-0';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'p-4 rounded-2xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center gap-3.5';
+          numBox.className = 'w-10 h-10 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-extrabold text-lg shrink-0';
+        }
+      });
+    }
+
+    /*************************************************************************
+     * 3. 커팅 최적화 엔진
      *************************************************************************/
     function calculateBarRemainder(barLength, cuts, kerf) {
       const sumCuts = cuts.reduce((acc, v) => acc + v, 0);
@@ -543,6 +883,7 @@
 
       const rem = calc.remainder;
       const { scrapMax, usableMin } = settings;
+      const dict = t();
 
       let status = '';
       let nextOffcut = 0;
@@ -555,25 +896,25 @@
         nextOffcut = 0;
         scrapLoss = 0;
         penalty = 0;
-        reasonTag = '잔여 없이 완벽 소진';
+        reasonTag = dict.reasonPerfect;
       } else if (rem <= scrapMax) {
         status = 'SCRAP';
         nextOffcut = 0;
         scrapLoss = rem;
         penalty = rem * 1.3;
-        reasonTag = `잔여 ${rem}mm (≤${scrapMax}mm 폐기)`;
+        reasonTag = dict.reasonScrap(rem, scrapMax);
       } else if (rem >= usableMin) {
         status = 'USABLE_OFFCUT';
         nextOffcut = rem;
         scrapLoss = 0;
         penalty = 80 + (barLength * 0.015);
-        reasonTag = `잔여 ${rem}mm (≥${usableMin}mm 재사용 가능 오프컷 생성)`;
+        reasonTag = dict.reasonUsable(rem, usableMin);
       } else {
         status = 'AWKWARD_OFFCUT';
         nextOffcut = rem;
         scrapLoss = 0;
         penalty = 5000 + (usableMin - rem) * 2;
-        reasonTag = `잔여 ${rem}mm (최소 너비 ${usableMin}mm 미만으로 재사용 어려움 · 비추천)`;
+        reasonTag = dict.reasonAwkward(rem, usableMin);
       }
 
       if (cuts.length >= 2) {
@@ -609,13 +950,10 @@
       function dfs(startIndex, currentCuts, currentSum) {
         if (currentCuts.length > 0) {
           const ev = evaluatePatternScore(barSourceType, barLength, currentCuts, kerf, settings);
-          if (ev) {
-            if (!bestEval || ev.scorePerPiece < bestEval.scorePerPiece) {
-              bestEval = ev;
-            }
+          if (ev && (!bestEval || ev.scorePerPiece < bestEval.scorePerPiece)) {
+            bestEval = ev;
           }
         }
-
         if (currentCuts.length >= 5) return;
 
         for (let i = startIndex; i < remainingPieces.length; i++) {
@@ -641,9 +979,7 @@
       orderItems.forEach(item => {
         const len = Number(item.length);
         const qty = Number(item.qty);
-        for (let i = 0; i < qty; i++) {
-          neededPieces.push(len);
-        }
+        for (let i = 0; i < qty; i++) neededPieces.push(len);
       });
       neededPieces.sort((a, b) => b - a);
 
@@ -668,10 +1004,7 @@
       let singleComparisons = null;
       if (neededPieces.length >= 1) {
         const samplePiece = neededPieces[0];
-        singleComparisons = {
-          targetLength: samplePiece,
-          options: []
-        };
+        singleComparisons = { targetLength: samplePiece, options: [] };
         const uniqueOffcutLens = [...new Set(availableOffcuts.map(o => o.length))].sort((a, b) => a - b);
         uniqueOffcutLens.forEach(oLen => {
           const ev = evaluatePatternScore('OFFCUT', oLen, [samplePiece], kerf, stateObj.settings);
@@ -693,11 +1026,9 @@
         for (let idx = 0; idx < availableOffcuts.length; idx++) {
           const oc = availableOffcuts[idx];
           const ev = findBestPatternForBar('OFFCUT', oc.length, neededPieces, kerf, stateObj.settings);
-          if (ev) {
-            if (!bestCandidate || ev.scorePerPiece < bestCandidate.scorePerPiece) {
-              bestCandidate = { ...ev, offcutId: oc.id };
-              bestOffcutIndex = idx;
-            }
+          if (ev && (!bestCandidate || ev.scorePerPiece < bestCandidate.scorePerPiece)) {
+            bestCandidate = { ...ev, offcutId: oc.id };
+            bestOffcutIndex = idx;
           }
         }
 
@@ -705,10 +1036,8 @@
           for (const stdLen of colorMeta.standardLengths) {
             if ((availableRawCounts[stdLen] || 0) <= 0) continue;
             const ev = findBestPatternForBar('RAW', stdLen, neededPieces, kerf, stateObj.settings);
-            if (ev) {
-              if (!bestCandidate || ev.scorePerPiece < bestCandidate.scorePerPiece) {
-                bestCandidate = ev;
-              }
+            if (ev && (!bestCandidate || ev.scorePerPiece < bestCandidate.scorePerPiece)) {
+              bestCandidate = ev;
             }
           }
         }
@@ -736,15 +1065,8 @@
       steps.forEach(st => {
         const key = `${st.barSourceType}_${st.barLength}_${st.cuts.join(',')}`;
         const existing = groupedSteps.find(g => g.key === key);
-        if (existing) {
-          existing.count += 1;
-        } else {
-          groupedSteps.push({
-            key,
-            count: 1,
-            ...st
-          });
-        }
+        if (existing) existing.count += 1;
+        else groupedSteps.push({ key, count: 1, ...st });
       });
 
       return {
@@ -757,10 +1079,73 @@
     }
 
     /*************************************************************************
-     * 3. UI 렌더링 함수들
+     * 4. 전체 UI 렌더링
      *************************************************************************/
     function renderAll() {
-      renderRuleSummary();
+      const dict = t();
+      const { kerf, scrapMax, usableMin } = state.settings;
+      const currMeta = getColorMeta(state.selectedColor);
+
+      // Header & Navigation Texts
+      document.getElementById('headerTitle').textContent = dict.headerTitle;
+      document.getElementById('headerSubtitle').textContent = dict.headerSubtitle(kerf, scrapMax, usableMin);
+      document.getElementById('langToggleText').textContent = dict.langToggleText;
+      document.getElementById('btnSettingsText').textContent = dict.btnSettingsText;
+      document.getElementById('btnBackupText').textContent = dict.btnBackupText;
+      document.getElementById('btnRestoreText').textContent = dict.btnRestoreText;
+
+      document.getElementById('stepTitle1').textContent = dict.stepTitle1;
+      document.getElementById('stepDesc1').textContent = dict.stepDesc1;
+      document.getElementById('stepTitle2').textContent = dict.stepTitle2;
+      document.getElementById('stepDesc2').textContent = dict.stepDesc2;
+      document.getElementById('stepTitle3').textContent = dict.stepTitle3;
+      document.getElementById('stepDesc3').textContent = dict.stepDesc3;
+
+      // Step 1 Static Texts
+      document.getElementById('s1SelectColorTitle').textContent = dict.s1SelectColorTitle;
+      document.getElementById('s1SelectColorHint').textContent = dict.s1SelectColorHint;
+      document.getElementById('s1InputLengthTitle').textContent = dict.s1InputLengthTitle(currMeta.name);
+      document.getElementById('s1StdLengthInfo').textContent = dict.s1StdLengthInfo(
+        currMeta.standardLengths.map(l => l.toLocaleString()).join(' / ')
+      );
+      document.getElementById('labelCutLength').textContent = dict.labelCutLength;
+      document.getElementById('labelCutQty').textContent = dict.labelCutQty;
+      document.getElementById('btnAddItemText').textContent = dict.btnAddItemText;
+      document.getElementById('labelQuickAdd').textContent = dict.labelQuickAdd;
+      document.getElementById('btnClearCurrentColor').textContent = dict.btnClearCurrentColor;
+      document.getElementById('btnClearAllColors').textContent = dict.btnClearAllColors;
+      document.getElementById('btnCalcSingleColor').textContent = dict.btnCalcSingleColor;
+      document.getElementById('btnCalcAllColors').textContent = dict.btnCalcAllColors;
+
+      // Step 2 Static Texts
+      document.getElementById('btnBackToStep1').textContent = dict.btnBackToStep1;
+      document.getElementById('btnPrintGuide').textContent = dict.btnPrintGuide;
+
+      // Step 3 Static Texts
+      document.getElementById('s3OverviewTitle').textContent = dict.s3OverviewTitle;
+      document.getElementById('s3OverviewHint').textContent = dict.s3OverviewHint;
+      document.getElementById('s3SelectedColorStockTitle').textContent = dict.s3SelectedColorStockTitle(currMeta.name);
+      document.getElementById('tabBtnOffcut').textContent = dict.tabOffcut;
+      document.getElementById('tabBtnRaw').textContent = dict.tabRaw;
+      document.getElementById('s3ManualAddTitle').textContent = dict.s3ManualAddTitle(currMeta.name);
+      document.getElementById('s3LabelOffcutLen').textContent = dict.s3LabelOffcutLen;
+      document.getElementById('s3LabelOffcutQty').textContent = dict.s3LabelOffcutQty;
+      document.getElementById('s3BtnAddOffcut').textContent = dict.s3BtnAddOffcut;
+      document.getElementById('s3RawLimitTitle').textContent = dict.s3RawLimitTitle;
+      document.getElementById('s3RawLimitDesc').textContent = dict.s3RawLimitDesc;
+      document.getElementById('s3HistoryTitle').textContent = dict.s3HistoryTitle;
+      document.getElementById('s3BtnClearHistory').textContent = dict.s3BtnClearHistory;
+
+      // Modal Texts
+      document.getElementById('modalSettingsTitle').textContent = dict.modalSettingsTitle;
+      document.getElementById('modalLabelKerf').textContent = dict.modalLabelKerf;
+      document.getElementById('modalLabelScrap').textContent = dict.modalLabelScrap;
+      document.getElementById('modalLabelUsable').textContent = dict.modalLabelUsable;
+      document.getElementById('modalBtnReset').textContent = dict.modalBtnReset;
+      document.getElementById('modalBtnCancel').textContent = dict.modalBtnCancel;
+      document.getElementById('modalBtnSave').textContent = dict.modalBtnSave;
+
+      renderStepperAndViews();
       renderColorSelector();
       renderOrderItems();
       renderStockSection();
@@ -768,13 +1153,8 @@
       renderHistoryLog();
     }
 
-    function renderRuleSummary() {
-      const { kerf, scrapMax, usableMin } = state.settings;
-      document.getElementById('ruleSummaryBadge').textContent =
-        `톱날 ${kerf}mm | 폐기 ≤${scrapMax}mm | 권장오프컷 ≥${usableMin}mm`;
-    }
-
     function renderColorSelector() {
+      const dict = t();
       const grid = document.getElementById('colorSelectorGrid');
       grid.innerHTML = PROFILE_COLORS.map(c => {
         const isSelected = c.id === state.selectedColor;
@@ -783,78 +1163,80 @@
 
         return `
           <button onclick="selectColor('${c.id}')"
-            class="p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+            class="p-4 rounded-2xl border-2 text-left transition flex flex-col justify-between min-h-[112px] ${
               isSelected
-                ? 'bg-indigo-600/25 border-cyan-400 ring-1 ring-cyan-400'
-                : 'bg-slate-900/60 border-slate-700/80 hover:bg-slate-800'
+                ? 'bg-indigo-950/70 border-cyan-400 shadow-lg shadow-cyan-500/15'
+                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/60'
             }">
-            <div class="flex items-center justify-between w-full mb-1.5 gap-1">
-              <span class="w-3 h-3 rounded-full shrink-0 ${c.dotClass}"></span>
+            <div class="flex items-center justify-between w-full mb-2 gap-1">
+              <span class="w-4 h-4 rounded-full shrink-0 ${c.dotClass}"></span>
               <div class="flex items-center gap-1 flex-wrap justify-end">
                 ${
                   orderPiecesCount > 0
-                    ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold">대기 ${orderPiecesCount}컷</span>`
+                    ? `<span class="text-xs px-2 py-0.5 rounded-lg bg-cyan-400 text-slate-950 font-extrabold">${dict.badgeWaitCuts(orderPiecesCount)}</span>`
                     : ''
                 }
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-semibold">
-                  오프컷 ${offcutCount}
+                <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-emerald-300 font-bold">
+                  ${dict.badgeOffcutCnt(offcutCount)}
                 </span>
               </div>
             </div>
-            <div class="text-xs font-bold text-white truncate">${c.name}</div>
-            <div class="text-[10px] text-slate-400">${c.standardLengths.map(l => l.toLocaleString()).join(' / ')}mm</div>
+            <div>
+              <div class="text-base font-extrabold text-white truncate">${c.name}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${c.standardLengths.map(l => l.toLocaleString()).join(' / ')}mm</div>
+            </div>
           </button>
         `;
       }).join('');
-
-      const currMeta = getColorMeta(state.selectedColor);
-      document.getElementById('currentColorLabel').textContent = `${currMeta.name} (${currMeta.korName})`;
-      document.getElementById('offcutAddColorLabel').textContent = currMeta.name;
-      document.getElementById('inputTargetColorTitle').textContent = `[${currMeta.name}] 커팅 치수 추가`;
-      document.getElementById('inputTargetStdLengths').textContent =
-        `표준원장: ${currMeta.standardLengths.map(l => l.toLocaleString()).join(' / ')}mm`;
     }
 
     function renderOrderItems() {
+      const dict = t();
       const container = document.getElementById('orderItemsContainer');
       const currentMeta = getColorMeta(state.selectedColor);
       const currentList = getColorOrders(state.selectedColor);
       const currentColorPieces = getTotalOrderPiecesForColor(state.selectedColor);
       const allColorsPieces = getTotalOrderPiecesAllColors();
 
-      document.getElementById('currentOrderHeaderLabel').innerHTML =
-        `[${currentMeta.name}] 대기 목록 (<span id="orderCountBadge" class="text-cyan-300">${currentColorPieces}</span>건)`;
+      document.getElementById('currentOrderHeaderLabel').textContent =
+        dict.currentOrderHeaderLabel(currentMeta.name, currentColorPieces);
       document.getElementById('totalAllColorsOrderBadge').textContent =
-        `전체 색상 합계 ${allColorsPieces}건`;
+        dict.totalAllColorsOrderBadge(allColorsPieces);
 
       if (currentList.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-4 text-xs text-slate-500 bg-slate-900/40 rounded-lg border border-dashed border-slate-700/70">
-            현재 <strong class="text-slate-300">${currentMeta.name}</strong> 색상에 입력된 커팅 목록이 없습니다.
+          <div class="text-center py-8 text-base text-slate-400 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
+            ${dict.emptyColorOrder(currentMeta.name)}
           </div>
         `;
       } else {
         container.innerHTML = currentList.map((item, idx) => `
-          <div class="flex items-center justify-between bg-slate-900/80 border border-slate-700/80 rounded-lg px-3 py-2">
-            <div class="flex items-center gap-2.5">
-              <span class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold flex items-center justify-center">
+          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-3.5">
+            <div class="flex items-center gap-3.5">
+              <span class="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-extrabold flex items-center justify-center">
                 ${idx + 1}
               </span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${currentMeta.badgeClass}">${currentMeta.name}</span>
-              <span class="text-sm font-bold text-white">${Number(item.length).toLocaleString()} mm</span>
-              ${item.length < state.settings.usableMin ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">최소너비(${state.settings.usableMin}) 미만</span>` : ''}
+              <span class="text-xs px-2.5 py-1 rounded-lg font-extrabold ${currentMeta.badgeClass}">${currentMeta.name}</span>
+              <span class="text-xl font-extrabold text-white">${Number(item.length).toLocaleString()} mm</span>
+              ${
+                item.length < state.settings.usableMin
+                  ? `<span class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold">${dict.belowMinWidth(state.settings.usableMin)}</span>`
+                  : ''
+              }
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">-</button>
-              <span class="text-xs font-bold text-cyan-300 w-8 text-center">${item.qty}개</span>
-              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">+</button>
-              <button onclick="removeOrderItem('${state.selectedColor}', '${item.id}')" class="ml-1 text-slate-500 hover:text-rose-400 text-sm font-bold px-1">&times;</button>
+            <div class="flex items-center gap-3">
+              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', -1)"
+                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">-</button>
+              <span class="text-base font-extrabold text-cyan-300 w-14 text-center">${item.qty} ${dict.unitPcs}</span>
+              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', 1)"
+                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">+</button>
+              <button onclick="removeOrderItem('${state.selectedColor}', '${item.id}')"
+                class="ml-2 text-slate-500 hover:text-rose-400 text-xl font-extrabold px-2">&times;</button>
             </div>
           </div>
         `).join('');
       }
 
-      // 다른 색상에 입력된 대기 목록이 있으면 하단에 요약 표시 (클릭 시 해당 색상으로 바로 이동)
       const otherSummaryEl = document.getElementById('otherColorsOrderSummary');
       const otherColorsWithOrders = PROFILE_COLORS.filter(
         c => c.id !== state.selectedColor && getTotalOrderPiecesForColor(c.id) > 0
@@ -866,15 +1248,15 @@
       } else {
         otherSummaryEl.classList.remove('hidden');
         otherSummaryEl.innerHTML = `
-          <div class="text-[11px] text-slate-400 mb-1.5">다른 색상에 대기 중인 커팅 목록 (클릭하여 전환):</div>
-          <div class="flex flex-wrap gap-1.5">
+          <div class="text-xs font-bold text-slate-400 mb-2">${dict.otherColorsSummaryLabel}</div>
+          <div class="flex flex-wrap gap-2">
             ${otherColorsWithOrders.map(c => {
               const items = getColorOrders(c.id);
-              const detailText = items.map(i => `${i.length}×${i.qty}`).join(', ');
+              const detailText = items.map(i => `${i.length}mm×${i.qty}`).join(', ');
               return `
                 <button onclick="selectColor('${c.id}')"
-                  class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 flex items-center gap-1.5 transition">
-                  <span class="w-2 h-2 rounded-full ${c.dotClass}"></span>
+                  class="text-sm px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-200 flex items-center gap-2 transition">
+                  <span class="w-3 h-3 rounded-full ${c.dotClass}"></span>
                   <strong class="text-cyan-300">${c.name}</strong>
                   <span class="text-slate-400">(${detailText})</span>
                 </button>
@@ -885,169 +1267,8 @@
       }
     }
 
-    function renderStockSection() {
-      const isOffcut = state.stockTab === 'offcut';
-      document.getElementById('stockTabOffcut').classList.toggle('hidden', !isOffcut);
-      document.getElementById('stockTabRaw').classList.toggle('hidden', isOffcut);
-
-      document.getElementById('tabBtnOffcut').className = isOffcut
-        ? 'px-2.5 py-1 rounded-md font-semibold bg-emerald-500 text-slate-950 transition'
-        : 'px-2.5 py-1 rounded-md font-semibold text-slate-400 hover:text-white transition';
-      document.getElementById('tabBtnRaw').className = !isOffcut
-        ? 'px-2.5 py-1 rounded-md font-semibold bg-cyan-500 text-slate-950 transition'
-        : 'px-2.5 py-1 rounded-md font-semibold text-slate-400 hover:text-white transition';
-
-      const offcutList = state.offcuts[state.selectedColor] || [];
-      const offcutContainer = document.getElementById('offcutListContainer');
-
-      if (offcutList.length === 0) {
-        offcutContainer.innerHTML = `
-          <div class="text-center py-6 text-xs text-slate-500 bg-slate-900/40 rounded-xl border border-dashed border-slate-700">
-            현재 <span class="text-slate-300 font-semibold">${state.selectedColor}</span> 색상의 보유 OFFCUT 재고가 없습니다.<br/>
-            커팅 가이드를 확정하면 남은 오프컷이 이곳에 자동 등록됩니다.
-          </div>
-        `;
-      } else {
-        const sorted = [...offcutList].sort((a, b) => b.length - a.length);
-        offcutContainer.innerHTML = sorted.map(oc => {
-          const isUsable = oc.length >= state.settings.usableMin;
-          return `
-            <div class="flex items-center justify-between bg-slate-900/90 border border-slate-700/80 rounded-lg px-3 py-2">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isUsable ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
-                  OFFCUT
-                </span>
-                <span class="text-sm font-bold text-white">${Number(oc.length).toLocaleString()} mm</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <button onclick="changeOffcutQty('${oc.id}', -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">-</button>
-                <span class="text-xs font-bold text-emerald-300 w-8 text-center">${oc.qty}개</span>
-                <button onclick="changeOffcutQty('${oc.id}', 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">+</button>
-                <button onclick="deleteOffcut('${oc.id}')" class="ml-1 text-slate-500 hover:text-rose-400 text-sm font-bold px-1">&times;</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      document.getElementById('useRawStockLimitToggle').checked = !!state.useRawStockLimit;
-      const colorMeta = getColorMeta(state.selectedColor);
-      const rawContainer = document.getElementById('rawStockListContainer');
-      rawContainer.innerHTML = colorMeta.standardLengths.map(len => {
-        const qty = state.rawStocks[state.selectedColor]?.[len] ?? 0;
-        return `
-          <div class="flex items-center justify-between bg-slate-900/90 border border-slate-700/80 rounded-lg px-3.5 py-2.5">
-            <div>
-              <span class="text-xs font-semibold text-cyan-300 mr-2">표준 원장</span>
-              <span class="text-sm font-bold text-white">${len.toLocaleString()} mm</span>
-            </div>
-            ${
-              state.useRawStockLimit
-                ? `<div class="flex items-center gap-2">
-                    <button onclick="changeRawStockQty(${len}, -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">-</button>
-                    <input type="number" value="${qty}" onchange="setRawStockQty(${len}, this.value)"
-                      class="w-16 text-center bg-slate-800 border border-slate-600 rounded py-1 text-xs font-bold text-white" />
-                    <button onclick="changeRawStockQty(${len}, 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">+</button>
-                  </div>`
-                : `<span class="text-xs font-semibold text-emerald-400">상시 보유 (무제한)</span>`
-            }
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderAllColorOffcutOverview() {
-      const container = document.getElementById('allColorOffcutOverview');
-      container.innerHTML = PROFILE_COLORS.map(c => {
-        const list = (state.offcuts[c.id] || []).filter(x => x.qty > 0).sort((a, b) => b.length - a.length);
-        const totalQty = list.reduce((s, x) => s + Number(x.qty), 0);
-        return `
-          <div onclick="selectColor('${c.id}')" class="cursor-pointer bg-slate-900/80 hover:bg-slate-900 border ${state.selectedColor === c.id ? 'border-cyan-500/60' : 'border-slate-700/70'} rounded-xl p-3 transition">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full ${c.dotClass}"></span>
-                <span class="text-xs font-bold text-white">${c.name}</span>
-              </div>
-              <span class="text-[11px] font-bold ${totalQty > 0 ? 'text-emerald-400' : 'text-slate-500'}">오프컷 ${totalQty}개</span>
-            </div>
-            ${
-              list.length === 0
-                ? `<div class="text-[11px] text-slate-500">보유 오프컷 없음</div>`
-                : `<div class="flex flex-wrap gap-1">
-                    ${list.map(item => `
-                      <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">
-                        <strong class="text-emerald-300">${item.length}</strong>mm × ${item.qty}
-                      </span>
-                    `).join('')}
-                  </div>`
-            }
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderHistoryLog() {
-      const container = document.getElementById('historyLogContainer');
-      if (!state.history || state.history.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-4 text-xs text-slate-500 bg-slate-900/40 rounded-lg border border-dashed border-slate-700/70">
-            아직 확정된 커팅 작업 이력이 없습니다.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = state.history.slice(0, 20).map(h => `
-        <div class="bg-slate-900/80 border border-slate-700/70 rounded-lg p-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <span class="text-[10px] text-slate-400 mr-2">${h.timestamp}</span>
-            <span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold mr-1.5">${h.colorId}</span>
-            <span class="text-slate-200 font-medium">${h.summaryText}</span>
-          </div>
-          <div class="flex items-center gap-2 text-[11px]">
-            ${h.usedOffcutCount > 0 ? `<span class="text-amber-300">오프컷 소진 -${h.usedOffcutCount}개</span>` : ''}
-            ${h.createdOffcutCount > 0 ? `<span class="text-emerald-300">신규 오프컷 +${h.createdOffcutCount}개</span>` : ''}
-            ${h.scrapCount > 0 ? `<span class="text-rose-400">폐기 ${h.scrapCount}건</span>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    /*************************************************************************
-     * 4. 커팅 가이드 계산 및 시각화 렌더링 (단일 색상 또는 대기 중인 모든 색상)
-     *************************************************************************/
-    function generateCuttingGuide(mode) {
-      if (mode) state.guideMode = mode;
-      const targetMode = state.guideMode || 'ALL';
-
-      let targetColorIds = [];
-      if (targetMode === 'SINGLE') {
-        if (getTotalOrderPiecesForColor(state.selectedColor) > 0) {
-          targetColorIds = [state.selectedColor];
-        }
-      } else {
-        // 대기 목록이 있는 모든 색상 계산 (현재 선택된 색상을 맨 위에 배치)
-        const orderedColors = [
-          state.selectedColor,
-          ...PROFILE_COLORS.map(c => c.id).filter(id => id !== state.selectedColor)
-        ];
-        targetColorIds = orderedColors.filter(cid => getTotalOrderPiecesForColor(cid) > 0);
-      }
-
-      if (targetColorIds.length === 0) {
-        currentCalculatedPlans = [];
-        renderCuttingPlans([]);
-        return;
-      }
-
-      const plans = targetColorIds.map(cid =>
-        solveCuttingPlanForColor(cid, getColorOrders(cid), state)
-      );
-      currentCalculatedPlans = plans;
-      renderCuttingPlans(plans);
-    }
-
     function renderCuttingPlans(plans) {
+      const dict = t();
       const kpiContainer = document.getElementById('guideSummaryKPIs');
       const compBox = document.getElementById('singleComparisonBox');
       const planContainer = document.getElementById('cuttingPlanContainer');
@@ -1057,20 +1278,19 @@
       const activePlans = (plans || []).filter(p => p.steps.length > 0 || p.unfulfilled.length > 0);
 
       if (activePlans.length === 0) {
-        kpiContainer.classList.add('hidden');
+        kpiContainer.innerHTML = '';
         compBox.classList.add('hidden');
         applyBtnArea.classList.add('hidden');
         planContainer.innerHTML = `
-          <div class="text-center py-12 text-slate-500 border border-dashed border-slate-700 rounded-xl">
-            <div class="text-3xl mb-2">📏</div>
-            <div class="text-sm font-medium text-slate-300">대기 중인 커팅 목록이 없습니다.</div>
-            <div class="text-xs text-slate-500 mt-1">왼쪽에서 색상을 선택하고 커팅 길이를 추가해 주세요.</div>
+          <div class="text-center py-16 bg-slate-900/60 border border-dashed border-slate-700 rounded-3xl">
+            <div class="text-4xl mb-3">📏</div>
+            <div class="text-lg font-extrabold text-slate-200">${dict.noGuideYetTitle}</div>
+            <div class="text-sm text-slate-400 mt-1">${dict.noGuideYetDesc}</div>
           </div>
         `;
         return;
       }
 
-      // 전체 KPI 집계
       let usedOffcuts = 0;
       let usedRawBars = 0;
       let newUsableOffcuts = 0;
@@ -1080,46 +1300,43 @@
         plan.steps.forEach(st => {
           if (st.barSourceType === 'OFFCUT') usedOffcuts += st.count;
           else usedRawBars += st.count;
-
           if (st.nextOffcut > 0) newUsableOffcuts += st.count;
           totalScrapMm += st.scrapLoss * st.count;
         });
       });
 
-      kpiContainer.classList.remove('hidden');
       kpiContainer.innerHTML = `
-        <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3">
-          <div class="text-[11px] text-slate-400">우선 사용하는 OFFCUT</div>
-          <div class="text-lg font-extrabold text-emerald-400 mt-0.5">${usedOffcuts} <span class="text-xs font-normal">개</span></div>
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="text-xs font-bold text-slate-400">${dict.kpiUsedOffcut}</div>
+          <div class="text-2xl font-extrabold text-emerald-400 mt-1">${usedOffcuts} <span class="text-sm font-semibold">${dict.unitPcs}</span></div>
         </div>
-        <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3">
-          <div class="text-[11px] text-slate-400">신규 투입 표준 원장</div>
-          <div class="text-lg font-extrabold text-cyan-400 mt-0.5">${usedRawBars} <span class="text-xs font-normal">개</span></div>
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="text-xs font-bold text-slate-400">${dict.kpiUsedRaw}</div>
+          <div class="text-2xl font-extrabold text-cyan-400 mt-1">${usedRawBars} <span class="text-sm font-semibold">${dict.unitPcs}</span></div>
         </div>
-        <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3">
-          <div class="text-[11px] text-slate-400">새로 남는 보관용 오프컷</div>
-          <div class="text-lg font-extrabold text-indigo-400 mt-0.5">+${newUsableOffcuts} <span class="text-xs font-normal">개</span></div>
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="text-xs font-bold text-slate-400">${dict.kpiNewOffcut}</div>
+          <div class="text-2xl font-extrabold text-indigo-400 mt-1">+${newUsableOffcuts} <span class="text-sm font-semibold">${dict.unitPcs}</span></div>
         </div>
-        <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3">
-          <div class="text-[11px] text-slate-400">폐기 손실 (≤${state.settings.scrapMax}mm)</div>
-          <div class="text-lg font-extrabold text-rose-400 mt-0.5">${totalScrapMm.toLocaleString()} <span class="text-xs font-normal">mm</span></div>
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="text-xs font-bold text-slate-400">${dict.kpiScrapLoss(state.settings.scrapMax)}</div>
+          <div class="text-2xl font-extrabold text-rose-400 mt-1">${totalScrapMm.toLocaleString()} <span class="text-sm font-semibold">mm</span></div>
         </div>
       `;
 
-      // 현재 선택된 색상의 플랜에 대한 후보 비교표 표시
       const currentColorPlan = activePlans.find(p => p.colorId === state.selectedColor) || activePlans[0];
       if (currentColorPlan && currentColorPlan.singleComparisons && currentColorPlan.singleComparisons.options.length > 1) {
         const targetLen = currentColorPlan.singleComparisons.targetLength;
         const chosenStep = currentColorPlan.steps[0];
         compBox.classList.remove('hidden');
         compBox.innerHTML = `
-          <div class="flex items-center justify-between mb-2.5">
-            <div class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <span>💡 [${currentColorPlan.colorId}] ${targetLen.toLocaleString()}mm 커팅 시 원장별 효율 비교</span>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="text-base font-extrabold text-cyan-300">
+              ${dict.compTitle(currentColorPlan.colorId, targetLen)}
             </div>
-            <span class="text-[11px] text-slate-400">커팅날 ${state.settings.kerf}mm 차감 반영</span>
+            <span class="text-xs text-slate-400">${dict.compKerfNote(state.settings.kerf)}</span>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             ${currentColorPlan.singleComparisons.options.map(opt => {
               const isSelected = chosenStep && chosenStep.barSourceType === opt.barSourceType && chosenStep.barLength === opt.barLength && chosenStep.cuts.length === 1;
               let badgeColor = 'bg-slate-800 text-slate-300';
@@ -1128,21 +1345,21 @@
               else if (opt.status === 'SCRAP') badgeColor = 'bg-rose-500/20 text-rose-300 border border-rose-500/30';
 
               return `
-                <div class="p-2.5 rounded-lg border text-xs ${
+                <div class="p-4 rounded-2xl border-2 text-sm ${
                   isSelected
-                    ? 'bg-indigo-950/60 border-cyan-400 ring-1 ring-cyan-400/50'
-                    : 'bg-slate-950/50 border-slate-800 opacity-75'
+                    ? 'bg-indigo-950/70 border-cyan-400 shadow-md'
+                    : 'bg-slate-950/60 border-slate-800 opacity-75'
                 }">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="font-bold text-white">
-                      ${opt.barSourceType === 'OFFCUT' ? '♻️ 오프컷 ' : '📏 원장 '}${opt.barLength.toLocaleString()}mm
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="font-extrabold text-base text-white">
+                      ${opt.barSourceType === 'OFFCUT' ? dict.sourceShortOffcut : dict.sourceShortRaw}${opt.barLength.toLocaleString()}mm
                     </span>
-                    ${isSelected ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400 text-slate-950 font-extrabold">추천 선택</span>` : ''}
+                    ${isSelected ? `<span class="text-xs px-2 py-0.5 rounded-lg bg-cyan-400 text-slate-950 font-extrabold">${dict.compRecommended}</span>` : ''}
                   </div>
-                  <div class="text-[11px] text-slate-300 mb-1">
-                    잔여: <strong class="text-white">${opt.remainder.toLocaleString()}mm</strong> (날 ${opt.kerfTotal}mm)
+                  <div class="text-xs text-slate-300 mb-2">
+                    ${dict.compRemainder(opt.remainder, opt.kerfTotal)}
                   </div>
-                  <div class="text-[10px] px-1.5 py-1 rounded ${badgeColor}">
+                  <div class="text-xs px-2.5 py-1.5 rounded-lg font-semibold ${badgeColor}">
                     ${opt.reasonTag}
                   </div>
                 </div>
@@ -1154,28 +1371,33 @@
         compBox.classList.add('hidden');
       }
 
-      // 색상별 섹션으로 구분하여 커팅 바 시각화 렌더링
       planContainer.innerHTML = activePlans.map(plan => {
         const cMeta = getColorMeta(plan.colorId);
+        const totalBars = plan.steps.reduce((s, st) => s + st.count, 0);
         let sectionHtml = `
-          <div class="bg-slate-950/50 border border-slate-700/80 rounded-2xl p-4 space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-              <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full ${cMeta.dotClass}"></span>
-                <span class="text-sm font-extrabold text-white">${cMeta.name} (${cMeta.korName}) 커팅 가이드</span>
-                <span class="text-xs text-slate-400">총 ${plan.steps.reduce((s, st) => s + st.count, 0)}본 작업</span>
+          <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="w-5 h-5 rounded-full ${cMeta.dotClass}"></span>
+                <span class="text-xl font-extrabold text-white">
+                  ${state.lang === 'ko' ? dict.guideSectionTitle(cMeta.name, cMeta.korName) : dict.guideSectionTitle(cMeta.name)}
+                </span>
+                <span class="text-sm font-bold text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                  ${dict.guideTotalBars(totalBars)}
+                </span>
               </div>
-              <button onclick="applySingleColorPlan('${plan.colorId}')" class="no-print px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition">
-                ✓ ${cMeta.name}만 먼저 확정
+              <button onclick="applySingleColorPlan('${plan.colorId}')"
+                class="no-print px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-sm font-extrabold transition">
+                ${dict.btnApplyThisColorOnly(cMeta.name)}
               </button>
             </div>
         `;
 
         if (plan.unfulfilled.length > 0) {
           sectionHtml += `
-            <div class="bg-rose-950/60 border border-rose-500/50 rounded-xl p-3 text-xs text-rose-200">
-              <div class="font-bold text-rose-300 mb-0.5">⚠️ 커팅 불가능한 치수가 있습니다!</div>
-              <div>최대 원장 길이 초과 또는 재고 부족: <strong>${plan.unfulfilled.map(x => x + 'mm').join(', ')}</strong></div>
+            <div class="bg-rose-950/60 border border-rose-500/50 rounded-2xl p-4 text-sm text-rose-200">
+              <div class="font-extrabold text-rose-300 mb-1">${dict.unfulfilledTitle}</div>
+              <div>${dict.unfulfilledDesc} <strong>${plan.unfulfilled.map(x => x + 'mm').join(', ')}</strong></div>
             </div>
           `;
         }
@@ -1186,16 +1408,16 @@
 
           let segmentsHtml = '';
           step.cuts.forEach((cLen, cIdx) => {
-            const widthPct = Math.max((cLen / totalLen) * 100, 6).toFixed(2);
+            const widthPct = Math.max((cLen / totalLen) * 100, 8).toFixed(2);
             segmentsHtml += `
-              <div style="width: ${widthPct}%" class="bar-segment h-10 bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-extrabold text-xs flex flex-col items-center justify-center border-r border-slate-900 overflow-hidden px-1" title="커팅 ${cIdx + 1}: ${cLen}mm">
-                <span>${cLen.toLocaleString()}</span>
-                <span class="text-[9px] font-semibold opacity-80">CUT #${cIdx + 1}</span>
+              <div style="width: ${widthPct}%" class="bar-segment h-14 bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-extrabold text-sm flex flex-col items-center justify-center border-r border-slate-900 overflow-hidden px-1">
+                <span class="text-base">${cLen.toLocaleString()}mm</span>
+                <span class="text-[11px] font-bold opacity-80">CUT #${cIdx + 1}</span>
               </div>
             `;
             if (cIdx < step.kerfCount) {
               segmentsHtml += `
-                <div style="width: 1.2%" class="h-10 bg-rose-500 flex items-center justify-center text-[8px] font-bold text-white" title="커팅날 두께 ${state.settings.kerf}mm">
+                <div style="width: 1.4%" class="h-14 bg-rose-500 flex items-center justify-center text-[10px] font-bold text-white" title="Kerf ${state.settings.kerf}mm">
                   |
                 </div>
               `;
@@ -1203,67 +1425,67 @@
           });
 
           if (step.remainder > 0) {
-            const remPct = Math.max((step.remainder / totalLen) * 100, 8).toFixed(2);
+            const remPct = Math.max((step.remainder / totalLen) * 100, 10).toFixed(2);
             let remStyle = 'bg-emerald-500/30 text-emerald-200 border-emerald-500/50';
-            let remLabel = `신규 오프컷 보관`;
+            let remLabel = dict.remNewOffcut;
             if (step.status === 'SCRAP') {
               remStyle = 'bg-rose-500/25 text-rose-300 border-rose-500/40';
-              remLabel = `폐기 (≤${state.settings.scrapMax})`;
+              remLabel = dict.remScrap(state.settings.scrapMax);
             } else if (step.status === 'AWKWARD_OFFCUT') {
               remStyle = 'bg-amber-500/30 text-amber-200 border-amber-500/50';
-              remLabel = `오프컷 (${state.settings.usableMin}미만 주의)`;
+              remLabel = dict.remAwkward(state.settings.usableMin);
             }
             segmentsHtml += `
-              <div style="width: ${remPct}%" class="bar-segment h-10 ${remStyle} text-xs flex flex-col items-center justify-center px-1 overflow-hidden" title="잔여 길이: ${step.remainder}mm">
-                <span class="font-bold">${step.remainder.toLocaleString()}</span>
-                <span class="text-[9px] opacity-90">${remLabel}</span>
+              <div style="width: ${remPct}%" class="bar-segment h-14 ${remStyle} text-sm flex flex-col items-center justify-center px-1 overflow-hidden">
+                <span class="font-extrabold text-base">${step.remainder.toLocaleString()}mm</span>
+                <span class="text-[11px] opacity-90">${remLabel}</span>
               </div>
             `;
           }
 
           let outcomeBadge = '';
           if (step.status === 'PERFECT') {
-            outcomeBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">잔여 0mm (완벽 소진)</span>`;
+            outcomeBadge = `<span class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-sm font-extrabold">${dict.outPerfect}</span>`;
           } else if (step.status === 'SCRAP') {
-            outcomeBadge = `<span class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold">잔여 ${step.remainder.toLocaleString()}mm → 폐기 (≤${state.settings.scrapMax}mm)</span>`;
+            outcomeBadge = `<span class="px-3.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-sm font-extrabold">${dict.outScrap(step.remainder, state.settings.scrapMax)}</span>`;
           } else if (step.status === 'USABLE_OFFCUT') {
-            outcomeBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">잔여 ${step.remainder.toLocaleString()}mm → OFFCUT 재고 등록 (재사용 우수)</span>`;
+            outcomeBadge = `<span class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-sm font-extrabold">${dict.outUsable(step.remainder)}</span>`;
           } else {
-            outcomeBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">잔여 ${step.remainder.toLocaleString()}mm → OFFCUT 등록 (${state.settings.usableMin}mm 미만)</span>`;
+            outcomeBadge = `<span class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-sm font-extrabold">${dict.outAwkward(step.remainder, state.settings.usableMin)}</span>`;
           }
 
           return `
-            <div class="bg-slate-900/90 border ${isOffcutSource ? 'border-emerald-500/60' : 'border-slate-700'} rounded-xl p-4 shadow-md">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${
+            <div class="bg-slate-950/90 border-2 ${isOffcutSource ? 'border-emerald-500/70' : 'border-slate-800'} rounded-2xl p-5 shadow-lg">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                  <span class="px-3 py-1.5 rounded-xl text-sm font-extrabold ${
                     isOffcutSource
                       ? 'bg-emerald-400 text-slate-950'
                       : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                   }">
-                    ${isOffcutSource ? '♻️ 1순위: 보유 OFFCUT 사용' : '📏 신규 표준 프로파일 사용'}
+                    ${isOffcutSource ? dict.sourceOffcut : dict.sourceRaw}
                   </span>
-                  <span class="text-base font-extrabold text-white">${step.barLength.toLocaleString()} mm</span>
-                  <span class="text-xs px-2 py-0.5 rounded font-bold ${cMeta.badgeClass}">${cMeta.name}</span>
+                  <span class="text-2xl font-extrabold text-white">${step.barLength.toLocaleString()} mm</span>
+                  <span class="text-xs px-2.5 py-1 rounded-lg font-extrabold ${cMeta.badgeClass}">${cMeta.name}</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-500/40 text-xs font-extrabold">
-                    동일 작업 × ${step.count}본
+                <div>
+                  <span class="px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-500/40 text-sm font-extrabold">
+                    ${dict.sameWorkCount(step.count)}
                   </span>
                 </div>
               </div>
 
-              <!-- Bar Visual -->
-              <div class="w-full rounded-lg overflow-hidden flex border border-slate-700 mb-3 bg-slate-950">
+              <!-- Large Bar Visual -->
+              <div class="w-full rounded-xl overflow-hidden flex border border-slate-700 mb-4 bg-slate-900">
                 ${segmentsHtml}
               </div>
 
               <!-- Details Row -->
-              <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300 pt-1">
-                <div class="space-x-2">
-                  <span>✂️ <strong>커팅 내역:</strong> ${step.cuts.map(c => `${c.toLocaleString()}mm`).join(' + ')} (${step.cuts.length}컷)</span>
-                  <span class="text-slate-500">|</span>
-                  <span>⚙️ <strong>톱날 소모:</strong> ${step.kerfTotal}mm (${state.settings.kerf}mm × ${step.kerfCount}회)</span>
+              <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300 pt-1">
+                <div class="space-x-3">
+                  <span><strong>${dict.cutDetailsLabel}</strong> ${step.cuts.map(c => `${c.toLocaleString()}mm`).join(' + ')} (${step.cuts.length} ${dict.cutsUnit})</span>
+                  <span class="text-slate-600">|</span>
+                  <span><strong>${dict.kerfDetailsLabel}</strong> ${step.kerfTotal}mm (${state.settings.kerf}mm × ${step.kerfCount} ${dict.timesUnit})</span>
                 </div>
                 <div>
                   ${outcomeBadge}
@@ -1280,21 +1502,156 @@
       if (activePlans.some(p => p.steps.length > 0)) {
         applyBtnArea.classList.remove('hidden');
         applyBtnLabel.textContent = activePlans.length > 1
-          ? `✅ 표시된 ${activePlans.length}개 색상 전체 커팅 확정 (재고 반영)`
-          : `✅ [${activePlans[0].colorId}] 가이드대로 커팅 확정 (재고 반영)`;
+          ? dict.applyAllBtn(activePlans.length)
+          : dict.applySingleBtn(activePlans[0].colorId);
       } else {
         applyBtnArea.classList.add('hidden');
       }
     }
 
+    function renderStockSection() {
+      const dict = t();
+      const isOffcut = state.stockTab === 'offcut';
+      document.getElementById('stockTabOffcut').classList.toggle('hidden', !isOffcut);
+      document.getElementById('stockTabRaw').classList.toggle('hidden', isOffcut);
+
+      document.getElementById('tabBtnOffcut').className = isOffcut
+        ? 'px-4 py-2 rounded-lg font-extrabold bg-emerald-500 text-slate-950 transition'
+        : 'px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
+      document.getElementById('tabBtnRaw').className = !isOffcut
+        ? 'px-4 py-2 rounded-lg font-extrabold bg-cyan-500 text-slate-950 transition'
+        : 'px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
+
+      const offcutList = state.offcuts[state.selectedColor] || [];
+      const offcutContainer = document.getElementById('offcutListContainer');
+
+      if (offcutList.length === 0) {
+        offcutContainer.innerHTML = `
+          <div class="text-center py-10 text-base text-slate-400 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
+            ${dict.emptyOffcutStock(state.selectedColor)}
+          </div>
+        `;
+      } else {
+        const sorted = [...offcutList].sort((a, b) => b.length - a.length);
+        offcutContainer.innerHTML = sorted.map(oc => {
+          const isUsable = oc.length >= state.settings.usableMin;
+          return `
+            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-3.5">
+              <div class="flex items-center gap-3">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${isUsable ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
+                  OFFCUT
+                </span>
+                <span class="text-xl font-extrabold text-white">${Number(oc.length).toLocaleString()} mm</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button onclick="changeOffcutQty('${oc.id}', -1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">-</button>
+                <span class="text-base font-extrabold text-emerald-300 w-14 text-center">${oc.qty} ${dict.unitPcs}</span>
+                <button onclick="changeOffcutQty('${oc.id}', 1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">+</button>
+                <button onclick="deleteOffcut('${oc.id}')" class="ml-2 text-slate-500 hover:text-rose-400 text-xl font-extrabold px-2">&times;</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('useRawStockLimitToggle').checked = !!state.useRawStockLimit;
+      const colorMeta = getColorMeta(state.selectedColor);
+      const rawContainer = document.getElementById('rawStockListContainer');
+      rawContainer.innerHTML = colorMeta.standardLengths.map(len => {
+        const qty = state.rawStocks[state.selectedColor]?.[len] ?? 0;
+        return `
+          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-4">
+            <div>
+              <span class="text-sm font-bold text-cyan-300 mr-3">${dict.rawStdLabel}</span>
+              <span class="text-xl font-extrabold text-white">${len.toLocaleString()} mm</span>
+            </div>
+            ${
+              state.useRawStockLimit
+                ? `<div class="flex items-center gap-3">
+                    <button onclick="changeRawStockQty(${len}, -1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">-</button>
+                    <input type="number" value="${qty}" onchange="setRawStockQty(${len}, this.value)"
+                      class="w-20 text-center bg-slate-800 border border-slate-700 rounded-xl py-1.5 text-base font-extrabold text-white" />
+                    <button onclick="changeRawStockQty(${len}, 1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">+</button>
+                  </div>`
+                : `<span class="text-sm font-extrabold text-emerald-400">${dict.rawUnlimited}</span>`
+            }
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAllColorOffcutOverview() {
+      const dict = t();
+      const container = document.getElementById('allColorOffcutOverview');
+      container.innerHTML = PROFILE_COLORS.map(c => {
+        const list = (state.offcuts[c.id] || []).filter(x => x.qty > 0).sort((a, b) => b.length - a.length);
+        const totalQty = list.reduce((s, x) => s + Number(x.qty), 0);
+        return `
+          <div onclick="selectColor('${c.id}')"
+            class="cursor-pointer bg-slate-950/80 hover:bg-slate-900 border-2 ${state.selectedColor === c.id ? 'border-cyan-400' : 'border-slate-800'} rounded-2xl p-5 transition">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-3.5 h-3.5 rounded-full ${c.dotClass}"></span>
+                <span class="text-base font-extrabold text-white">${c.name}</span>
+              </div>
+              <span class="text-sm font-extrabold ${totalQty > 0 ? 'text-emerald-400' : 'text-slate-500'}">
+                ${dict.badgeOffcutCnt(totalQty)}
+              </span>
+            </div>
+            ${
+              list.length === 0
+                ? `<div class="text-sm text-slate-500">${dict.noOffcuts}</div>`
+                : `<div class="flex flex-wrap gap-1.5">
+                    ${list.map(item => `
+                      <span class="text-sm px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200">
+                        <strong class="text-emerald-300">${item.length.toLocaleString()}</strong>mm × ${item.qty}
+                      </span>
+                    `).join('')}
+                  </div>`
+            }
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistoryLog() {
+      const dict = t();
+      const container = document.getElementById('historyLogContainer');
+      if (!state.history || state.history.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-base text-slate-500 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+            ${dict.emptyHistory}
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.history.slice(0, 20).map(h => `
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-sm flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-xs text-slate-400 mr-2">${h.timestamp}</span>
+            <span class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-extrabold mr-2">${h.colorId}</span>
+            <span class="text-slate-200 font-semibold">${h.summaryText}</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-bold">
+            ${h.usedOffcutCount > 0 ? `<span class="text-amber-300">Offcut -${h.usedOffcutCount}</span>` : ''}
+            ${h.createdOffcutCount > 0 ? `<span class="text-emerald-300">New Offcut +${h.createdOffcutCount}</span>` : ''}
+            ${h.scrapCount > 0 ? `<span class="text-rose-400">Scrap ${h.scrapCount}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
     /*************************************************************************
-     * 5. 사용자 인터랙션 & 색상별 목록 조작 & 재고 반영 로직
+     * 5. 인터랙션 핸들러
      *************************************************************************/
     function selectColor(colorId) {
       state.selectedColor = colorId;
       saveState();
       renderAll();
-      generateCuttingGuide();
+      if (state.currentStep === 2) {
+        generateCuttingGuide(state.guideMode);
+      }
     }
 
     function switchStockTab(tab) {
@@ -1310,7 +1667,7 @@
       const qty = parseInt(qtyInput.value, 10) || 1;
 
       if (!length || length <= 0) {
-        showToast('올바른 커팅 길이(mm)를 입력해 주세요.');
+        showToast(state.lang === 'ko' ? '올바른 커팅 길이(mm)를 입력해 주세요.' : 'Please enter a valid cut length (mm).');
         lenInput.focus();
         return;
       }
@@ -1318,15 +1675,18 @@
       const colorMeta = getColorMeta(state.selectedColor);
       const maxStd = Math.max(...colorMeta.standardLengths);
       if (length > maxStd) {
-        showToast(`현재 색상(${state.selectedColor})의 최대 원장 길이(${maxStd.toLocaleString()}mm)를 초과합니다.`);
+        showToast(
+          state.lang === 'ko'
+            ? `현재 색상(${state.selectedColor})의 최대 원장 길이(${maxStd.toLocaleString()}mm)를 초과합니다.`
+            : `Exceeds max standard length (${maxStd.toLocaleString()}mm) for ${state.selectedColor}.`
+        );
         return;
       }
 
       const list = getColorOrders(state.selectedColor);
       const existing = list.find(x => Number(x.length) === length);
-      if (existing) {
-        existing.qty += qty;
-      } else {
+      if (existing) existing.qty += qty;
+      else {
         list.push({
           id: 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
           length,
@@ -1338,22 +1698,18 @@
       qtyInput.value = '1';
       saveState();
       renderAll();
-      generateCuttingGuide();
+      lenInput.focus();
     }
 
     function quickAdd(length, qty) {
       const colorMeta = getColorMeta(state.selectedColor);
       const maxStd = Math.max(...colorMeta.standardLengths);
-      if (length > maxStd) {
-        showToast(`현재 색상(${state.selectedColor})의 최대 원장 길이(${maxStd.toLocaleString()}mm)를 초과합니다.`);
-        return;
-      }
+      if (length > maxStd) return;
 
       const list = getColorOrders(state.selectedColor);
       const existing = list.find(x => Number(x.length) === length);
-      if (existing) {
-        existing.qty += qty;
-      } else {
+      if (existing) existing.qty += qty;
+      else {
         list.push({
           id: 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
           length,
@@ -1362,7 +1718,6 @@
       }
       saveState();
       renderAll();
-      generateCuttingGuide();
     }
 
     function changeOrderItemQty(colorId, id, delta) {
@@ -1370,48 +1725,60 @@
       const idx = list.findIndex(x => x.id === id);
       if (idx === -1) return;
       list[idx].qty += delta;
-      if (list[idx].qty <= 0) {
-        list.splice(idx, 1);
-      }
+      if (list[idx].qty <= 0) list.splice(idx, 1);
       saveState();
       renderAll();
-      generateCuttingGuide();
     }
 
     function removeOrderItem(colorId, id) {
       state.ordersByColor[colorId] = getColorOrders(colorId).filter(x => x.id !== id);
       saveState();
       renderAll();
-      generateCuttingGuide();
     }
 
     function clearCurrentColorOrderItems() {
       state.ordersByColor[state.selectedColor] = [];
       saveState();
       renderAll();
-      generateCuttingGuide();
-      showToast(`[${state.selectedColor}] 대기 목록을 비웠습니다.`);
     }
 
     function clearAllColorsOrderItems() {
-      PROFILE_COLORS.forEach(c => {
-        state.ordersByColor[c.id] = [];
-      });
+      PROFILE_COLORS.forEach(c => { state.ordersByColor[c.id] = []; });
       currentCalculatedPlans = [];
       saveState();
       renderAll();
-      generateCuttingGuide();
-      showToast('모든 색상의 대기 목록을 비웠습니다.');
     }
 
-    // 특정 색상 1개만 커팅 확정
+    function generateCuttingGuide(mode) {
+      if (mode) state.guideMode = mode;
+      const targetMode = state.guideMode || 'ALL';
+
+      let targetColorIds = [];
+      if (targetMode === 'SINGLE') {
+        if (getTotalOrderPiecesForColor(state.selectedColor) > 0) {
+          targetColorIds = [state.selectedColor];
+        }
+      } else {
+        const orderedColors = [
+          state.selectedColor,
+          ...PROFILE_COLORS.map(c => c.id).filter(id => id !== state.selectedColor)
+        ];
+        targetColorIds = orderedColors.filter(cid => getTotalOrderPiecesForColor(cid) > 0);
+      }
+
+      const plans = targetColorIds.map(cid =>
+        solveCuttingPlanForColor(cid, getColorOrders(cid), state)
+      );
+      currentCalculatedPlans = plans;
+      renderCuttingPlans(plans);
+    }
+
     function applySingleColorPlan(colorId) {
       const targetPlan = currentCalculatedPlans.find(p => p.colorId === colorId);
       if (!targetPlan || targetPlan.steps.length === 0) return;
       commitPlansToInventory([targetPlan]);
     }
 
-    // 현재 화면에 표시된 모든 가이드 확정
     function applyCuttingPlan() {
       const validPlans = (currentCalculatedPlans || []).filter(p => p.steps.length > 0);
       if (validPlans.length === 0) return;
@@ -1421,7 +1788,6 @@
     function commitPlansToInventory(plansToCommit) {
       let totalUsedOffcut = 0;
       let totalCreatedOffcut = 0;
-      let totalScrap = 0;
 
       plansToCommit.forEach(plan => {
         const colorId = plan.colorId;
@@ -1441,10 +1807,8 @@
                   state.offcuts[colorId] = ocList.filter(o => o.qty > 0);
                 }
               }
-            } else {
-              if (state.useRawStockLimit && state.rawStocks[colorId]?.[step.barLength] !== undefined) {
-                state.rawStocks[colorId][step.barLength] = Math.max(0, state.rawStocks[colorId][step.barLength] - 1);
-              }
+            } else if (state.useRawStockLimit && state.rawStocks[colorId]?.[step.barLength] !== undefined) {
+              state.rawStocks[colorId][step.barLength] = Math.max(0, state.rawStocks[colorId][step.barLength] - 1);
             }
 
             if (step.nextOffcut > state.settings.scrapMax) {
@@ -1458,14 +1822,15 @@
 
         totalUsedOffcut += usedOffcutCount;
         totalCreatedOffcut += createdOffcutCount;
-        totalScrap += scrapCount;
 
         const summaryParts = plan.steps.map(s =>
-          `${s.barSourceType === 'OFFCUT' ? '오프컷' : '원장'}(${s.barLength})→[${s.cuts.join('+')}mm]×${s.count}`
+          `${s.barSourceType === 'OFFCUT' ? 'OFFCUT' : 'STD'}(${s.barLength})→[${s.cuts.join('+')}mm]×${s.count}`
         );
         state.history.unshift({
           id: 'hist-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
-          timestamp: new Date().toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          timestamp: new Date().toLocaleString(state.lang === 'ko' ? 'ko-KR' : 'en-US', {
+            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+          }),
           colorId,
           summaryText: summaryParts.join(', '),
           usedOffcutCount,
@@ -1473,23 +1838,30 @@
           scrapCount
         });
 
-        // 확정된 색상의 대기 목록 비우기
         state.ordersByColor[colorId] = [];
       });
 
       saveState();
       renderAll();
-      generateCuttingGuide();
+      generateCuttingGuide(state.guideMode);
 
-      showToast(`커팅 확정 완료! (오프컷 소진 ${totalUsedOffcut}개 / 신규 오프컷 +${totalCreatedOffcut}개)`);
+      showToast(
+        state.lang === 'ko'
+          ? `✅ 커팅 확정 완료! (오프컷 소진 ${totalUsedOffcut}개 / 신규 오프컷 +${totalCreatedOffcut}개)`
+          : `✅ Confirmed! (Used Offcuts: ${totalUsedOffcut} / New Offcuts: +${totalCreatedOffcut})`
+      );
+
+      // 모든 대기 커팅이 완료되었으면 3단계(재고 확인 화면)로 자동 전환
+      if (getTotalOrderPiecesAllColors() === 0) {
+        goToStep(3);
+      }
     }
 
     function addOrIncrementOffcut(colorId, length, qty) {
       if (!state.offcuts[colorId]) state.offcuts[colorId] = [];
       const existing = state.offcuts[colorId].find(o => Number(o.length) === Number(length));
-      if (existing) {
-        existing.qty += Number(qty);
-      } else {
+      if (existing) existing.qty += Number(qty);
+      else {
         state.offcuts[colorId].push({
           id: 'oc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
           length: Number(length),
@@ -1505,7 +1877,11 @@
       const qty = parseInt(qtyEl.value, 10) || 1;
 
       if (!length || length <= state.settings.scrapMax) {
-        showToast(`오프컷은 폐기 기준(${state.settings.scrapMax}mm)보다 긴 길이만 등록할 수 있습니다.`);
+        showToast(
+          state.lang === 'ko'
+            ? `오프컷은 폐기 기준(${state.settings.scrapMax}mm)보다 긴 길이만 등록할 수 있습니다.`
+            : `Offcut length must be greater than scrap threshold (${state.settings.scrapMax}mm).`
+        );
         return;
       }
 
@@ -1514,8 +1890,6 @@
       qtyEl.value = '1';
       saveState();
       renderAll();
-      generateCuttingGuide();
-      showToast(`${state.selectedColor} 오프컷 ${length}mm × ${qty}개가 추가되었습니다.`);
     }
 
     function changeOffcutQty(id, delta) {
@@ -1528,21 +1902,18 @@
       }
       saveState();
       renderAll();
-      generateCuttingGuide();
     }
 
     function deleteOffcut(id) {
       state.offcuts[state.selectedColor] = (state.offcuts[state.selectedColor] || []).filter(x => x.id !== id);
       saveState();
       renderAll();
-      generateCuttingGuide();
     }
 
     function toggleRawStockLimit() {
       state.useRawStockLimit = document.getElementById('useRawStockLimitToggle').checked;
       saveState();
       renderStockSection();
-      generateCuttingGuide();
     }
 
     function changeRawStockQty(len, delta) {
@@ -1550,26 +1921,20 @@
       state.rawStocks[state.selectedColor][len] = Math.max(0, curr + delta);
       saveState();
       renderStockSection();
-      generateCuttingGuide();
     }
 
     function setRawStockQty(len, val) {
       state.rawStocks[state.selectedColor][len] = Math.max(0, parseInt(val, 10) || 0);
       saveState();
       renderStockSection();
-      generateCuttingGuide();
     }
 
     function clearHistory() {
       state.history = [];
       saveState();
       renderHistoryLog();
-      showToast('작업 이력이 초기화되었습니다.');
     }
 
-    /*************************************************************************
-     * 6. 설정 모달 및 백업(JSON) 입출력
-     *************************************************************************/
     function openSettingsModal() {
       document.getElementById('settingKerf').value = state.settings.kerf;
       document.getElementById('settingScrapMax').value = state.settings.scrapMax;
@@ -1594,20 +1959,18 @@
       saveState();
       closeSettingsModal();
       renderAll();
-      generateCuttingGuide();
-      showToast('커팅 및 오프컷 기준 설정이 저장되었습니다.');
+      if (state.currentStep === 2) generateCuttingGuide(state.guideMode);
     }
 
     function resetAllData() {
-      if (!confirm('모든 오프컷 재고와 색상별 대기 목록을 초기 상태로 되돌리시겠습니까?')) return;
+      if (!confirm(state.lang === 'ko' ? '모든 데이터를 초기화하시겠습니까?' : 'Reset all inventory and queue data?')) return;
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem('OFFCUT_MANAGER_STATE_V2');
       localStorage.removeItem('OFFCUT_MANAGER_STATE_V1');
       state = getDefaultState();
       saveState();
       closeSettingsModal();
       renderAll();
-      generateCuttingGuide();
-      showToast('초기 상태로 리셋되었습니다.');
     }
 
     function exportData() {
@@ -1619,7 +1982,6 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
-      showToast('백업 파일(JSON)이 다운로드되었습니다.');
     }
 
     function importData(event) {
@@ -1629,17 +1991,13 @@
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (!imported.offcuts || !imported.settings) {
-            throw new Error('유효하지 않은 백업 파일 형식입니다.');
-          }
+          if (!imported.offcuts || !imported.settings) throw new Error('Invalid backup file');
           localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
           state = loadState();
           saveState();
           renderAll();
-          generateCuttingGuide();
-          showToast('백업 데이터를 성공적으로 불러왔습니다!');
         } catch (err) {
-          alert('파일 불러오기 실패: ' + err.message);
+          alert('Failed to import: ' + err.message);
         }
       };
       reader.readAsText(file);
@@ -1648,7 +2006,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
-      generateCuttingGuide();
     });
   </script>
 </body>
