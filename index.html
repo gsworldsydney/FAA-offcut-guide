@@ -57,13 +57,12 @@
             프로파일 커팅 & OFFCUT 가이드
           </h1>
           <p id="headerSubtitle" class="text-sm text-slate-400">
-            톱날 5mm 차감 · 폐기 ≤1000mm · 권장 오프컷 ≥2000mm
+            톱날 5mm 차감 · 폐기 ≤1000mm · 권장 오프컷 ≥3000mm
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5">
-        <!-- Language Toggle Button -->
         <button onclick="toggleLanguage()" id="langToggleBtn"
           class="px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-sm font-extrabold flex items-center gap-2 transition">
           <span>🌐</span>
@@ -75,12 +74,19 @@
           <span id="btnSettingsText">⚙️ 기준 설정</span>
         </button>
 
-        <button onclick="exportData()"
-          class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 transition">
+        <!-- 재고 관리 (표) 상단 헤더 버튼 -->
+        <button onclick="goToStep(3)" id="headerBtnInventory"
+          class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-sm font-extrabold flex items-center gap-1.5 transition">
+          <span>📋</span>
+          <span id="btnHeaderInventoryText">재고 관리 (표)</span>
+        </button>
+
+        <!-- 백업/복원 버튼 (숨김 처리) -->
+        <button onclick="exportData()" class="hidden">
           <span id="btnBackupText">💾 백업</span>
         </button>
 
-        <label class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 cursor-pointer transition">
+        <label class="hidden">
           <span id="btnRestoreText">📂 복원</span>
           <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)" />
         </label>
@@ -88,17 +94,17 @@
     </div>
   </header>
 
-  <!-- Step Navigation Bar -->
+  <!-- Step Navigation Bar (2단계 워크플로우: 1. 작업지시서 입력 -> 2. 최적 커팅 가이드) -->
   <nav class="bg-slate-900/60 border-b border-slate-800/80 no-print">
     <div class="max-w-5xl mx-auto px-6 py-4">
-      <div class="grid grid-cols-3 gap-3 sm:gap-4" id="stepperNav">
+      <div class="grid grid-cols-2 gap-3 sm:gap-4" id="stepperNav">
         <!-- Step 1 Button -->
         <button onclick="goToStep(1)" id="stepBtn1"
           class="p-4 rounded-2xl border text-left transition flex items-center gap-3.5">
           <div id="stepNum1" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">1</div>
           <div class="overflow-hidden">
             <div id="stepTitle1" class="text-base font-extrabold truncate">작업지시서 입력</div>
-            <div id="stepDesc1" class="text-xs text-slate-400 truncate">색상 선택 및 커팅 길이 추가</div>
+            <div id="stepDesc1" class="text-xs text-slate-400 truncate">제품/사이즈 및 프로파일 자동 계산</div>
           </div>
         </button>
 
@@ -108,108 +114,128 @@
           <div id="stepNum2" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">2</div>
           <div class="overflow-hidden">
             <div id="stepTitle2" class="text-base font-extrabold truncate">최적 커팅 가이드</div>
-            <div id="stepDesc2" class="text-xs text-slate-400 truncate">원장 추천 확인 및 커팅 확정</div>
-          </div>
-        </button>
-
-        <!-- Step 3 Button -->
-        <button onclick="goToStep(3)" id="stepBtn3"
-          class="p-4 rounded-2xl border text-left transition flex items-center gap-3.5">
-          <div id="stepNum3" class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shrink-0">3</div>
-          <div class="overflow-hidden">
-            <div id="stepTitle3" class="text-base font-extrabold truncate">OFFCUT 재고 관리</div>
-            <div id="stepDesc3" class="text-xs text-slate-400 truncate">보유 오프컷 수정 및 작업 이력</div>
+            <div id="stepDesc2" class="text-xs text-slate-400 truncate">프로파일별 원장 추천 및 커팅 확정</div>
           </div>
         </button>
       </div>
     </div>
   </nav>
 
-  <!-- Main Wizard Content (Centered, Large & Spacious) -->
+  <!-- Main Wizard Content -->
   <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-8">
 
-    <!-- ==================== STEP 1: 작업지시서 입력 ==================== -->
+    <!-- ==================== STEP 1: 제품/사이즈/색상 입력 및 프로파일 자동 계산 ==================== -->
     <section id="stepView1" class="space-y-8">
 
-      <!-- 1-A. 색상 선택 카드 -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400" id="s1StepBadgeA">STEP 1-1</span>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1SelectColorTitle">
-              프로파일 색상을 선택하세요
-            </h2>
-          </div>
-          <span class="text-sm text-slate-400" id="s1SelectColorHint">
-            색상별로 커팅 목록이 각각 따로 저장됩니다.
-          </span>
+      <!-- 1-1. 제품의 종류 & Width(mm) & 색상 선택 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-7">
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400">STEP 1-1</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1ProductSectionTitle">
+            제품의 종류와 전체 폭(Width), 색상을 선택하세요
+          </h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5" id="colorSelectorGrid">
-          <!-- JS Rendered -->
+        <!-- (a) 제품의 종류 4가지 선택 (Family Basic / Titan / Kompakt / Millennium) -->
+        <div>
+          <label class="block text-sm font-extrabold text-slate-300 mb-3" id="s1LabelProductType">
+            a. 제품 종류 선택 (Product Type)
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5" id="productTypeGrid">
+            <!-- JS Rendered -->
+          </div>
+        </div>
+
+        <!-- (b) 색상 선택 (WHITE / BLACK / WOODLEND GREY / CHALCOAL / MILL FINISH) -->
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <label class="text-sm font-extrabold text-slate-300" id="s1LabelColorSelect">
+              b. 프로파일 색상 선택 (Profile Color)
+            </label>
+            <span class="text-xs font-bold text-cyan-300" id="s1StdLengthInfo">
+              표준 원장: 4,700 / 5,700 / 6,700 mm
+            </span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="colorSelectorGrid">
+            <!-- JS Rendered -->
+          </div>
+        </div>
+
+        <!-- (c) Width (mm) & 세트 수량 입력 -->
+        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+            <div class="sm:col-span-6">
+              <label class="block text-sm font-extrabold text-cyan-300 mb-2" id="s1LabelWidthInput">
+                c. 제품 가로 폭 (Width, 단위: mm)
+              </label>
+              <div class="relative">
+                <input type="number" id="productWidthInput" placeholder="예: 3500" min="200" max="11000" step="1"
+                  oninput="updateAutoCalculatedProfiles()"
+                  onkeydown="if(event.key==='Enter') addProductOrderSet()"
+                  class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-cyan-500/60 text-white font-extrabold text-2xl focus:outline-none focus:border-cyan-400 transition pr-14" />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-base">mm</span>
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-bold text-slate-300 mb-2" id="s1LabelSetQty">
+                수량 (대/Set)
+              </label>
+              <input type="number" id="productSetQtyInput" value="1" min="1" max="500"
+                oninput="updateAutoCalculatedProfiles()"
+                onkeydown="if(event.key==='Enter') addProductOrderSet()"
+                class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-slate-700 text-white font-extrabold text-2xl text-center focus:outline-none focus:border-cyan-400 transition" />
+            </div>
+
+            <div class="sm:col-span-4">
+              <button onclick="addProductOrderSet()"
+                class="w-full py-4 px-5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-extrabold text-base sm:text-lg transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2">
+                <span>+</span>
+                <span id="btnAddProductSetText">자동 계산된 프로파일 담기</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 1-B. 커팅 길이 및 수량 입력 카드 -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+      <!-- 1-2. 제품별 프로파일 종류에 따른 커팅 사이즈 자동 기입 프리뷰 & 개별 추가 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400" id="s1StepBadgeB">STEP 1-2</span>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1InputLengthTitle">
-              커팅 길이와 수량을 입력하세요
+            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">STEP 1-2</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s1AutoPreviewTitle">
+              프로파일 종류별 커팅 사이즈 자동 계산 결과
             </h2>
           </div>
-          <div class="px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-sm font-bold text-cyan-300" id="s1StdLengthInfo">
-            표준 원장: 4,700 / 5,700 / 6,700 mm
-          </div>
+          <span class="text-xs sm:text-sm text-slate-400" id="s1AutoPreviewHint">
+            Width를 입력하면 각 프로파일의 공제 치수가 자동으로 기입됩니다. (수동 수정도 가능)
+          </span>
         </div>
 
-        <!-- 큼직한 입력 폼 -->
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end bg-slate-950/80 border border-slate-800 rounded-2xl p-5 mb-5">
-          <div class="sm:col-span-5">
-            <label class="block text-sm font-bold text-slate-300 mb-2" id="labelCutLength">커팅 길이 (mm)</label>
-            <input type="number" id="cutLengthInput" placeholder="3300" min="100" max="11000" step="1"
-              class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-slate-700 text-white font-extrabold text-xl focus:outline-none focus:border-cyan-400 transition"
-              onkeydown="if(event.key==='Enter') addCutOrderItem()" />
-          </div>
-          <div class="sm:col-span-3">
-            <label class="block text-sm font-bold text-slate-300 mb-2" id="labelCutQty">수량 (Qty)</label>
-            <input type="number" id="cutQtyInput" value="1" min="1" max="500"
-              class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border-2 border-slate-700 text-white font-extrabold text-xl focus:outline-none focus:border-cyan-400 transition"
-              onkeydown="if(event.key==='Enter') addCutOrderItem()" />
-          </div>
-          <div class="sm:col-span-4">
-            <button onclick="addCutOrderItem()"
-              class="w-full py-4 px-5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-lg transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2">
-              <span>+</span>
-              <span id="btnAddItemText">목록에 추가</span>
-            </button>
-          </div>
+        <!-- 자동 기입된 프로파일 테이블 -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/70">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/90 border-b border-slate-800 text-xs sm:text-sm font-extrabold text-slate-300">
+                <th class="py-3.5 px-4 w-12 text-center" id="thAutoUse">포함</th>
+                <th class="py-3.5 px-4" id="thAutoProfile">프로파일 종류 (Profile Type)</th>
+                <th class="py-3.5 px-4" id="thAutoFormula">적용 공식 (Deduction)</th>
+                <th class="py-3.5 px-4" id="thAutoCutSize">자동 기입 커팅 길이 (mm)</th>
+                <th class="py-3.5 px-4 text-center" id="thAutoQty">수량</th>
+              </tr>
+            </thead>
+            <tbody id="autoProfilePreviewTbody" class="divide-y divide-slate-800/80 text-sm">
+              <!-- JS Rendered -->
+            </tbody>
+          </table>
         </div>
 
-        <!-- 빠른 입력 버튼 -->
-        <div class="flex flex-wrap items-center gap-2 mb-8">
-          <span class="text-sm font-semibold text-slate-400 mr-1" id="labelQuickAdd">빠른 테스트 입력:</span>
-          <button onclick="quickAdd(3300, 1)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-semibold transition">
-            3,300mm × 1
-          </button>
-          <button onclick="quickAdd(2200, 2)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
-            2,200mm × 2
-          </button>
-          <button onclick="quickAdd(2500, 1)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
-            2,500mm × 1
-          </button>
-          <button onclick="quickAdd(3100, 2)" class="text-sm px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition">
-            3,100mm × 2
-          </button>
-        </div>
-
-        <!-- 현재 선택 색상의 대기 목록 -->
+        <!-- 대기 중인 전체 커팅 목록 (색상 & 프로파일 종류별 분류) -->
         <div class="border-t border-slate-800 pt-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div class="flex items-center gap-3">
               <h3 class="text-lg font-extrabold text-white" id="currentOrderHeaderLabel">
-                [WHITE] 대기 목록 (0건)
+                [WHITE] 대기 중인 커팅 목록 (0건)
               </h3>
               <span class="text-xs px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold" id="totalAllColorsOrderBadge">
                 전체 색상 합계 0건
@@ -226,7 +252,7 @@
             </div>
           </div>
 
-          <div id="orderItemsContainer" class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+          <div id="orderItemsContainer" class="space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar pr-1">
             <!-- JS Rendered -->
           </div>
 
@@ -276,13 +302,21 @@
         </div>
       </div>
 
-      <!-- KPI 요약 카드 (큼직하게 표시) -->
-      <div id="guideSummaryKPIs" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <!-- JS Rendered -->
+      <!-- 현장 매니저 안내 배너 -->
+      <div id="managerOverrideHintBar" class="bg-indigo-950/50 border border-indigo-500/40 rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 no-print">
+        <div class="flex items-center gap-2.5 text-sm text-indigo-200">
+          <span class="text-lg">👷‍♂️</span>
+          <span id="managerHintText" class="font-medium">
+            현장에 추천된 길이의 프로파일 재고가 없다면, 각 작업 카드의 <strong>[🔄 다른 프로파일 길이 선택]</strong>에서 즉시 변경하거나 <strong>[품절 제외]</strong>를 누르세요.
+          </span>
+        </div>
+        <button id="btnResetExclusions" onclick="clearExcludedStocks()" class="hidden px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-extrabold transition">
+          품절 제외 초기화
+        </button>
       </div>
 
-      <!-- 왜 이 원장이 선택되었는지 비교 분석 박스 -->
-      <div id="singleComparisonBox" class="hidden bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl no-print">
+      <!-- KPI 요약 카드 -->
+      <div id="guideSummaryKPIs" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <!-- JS Rendered -->
       </div>
 
@@ -293,89 +327,110 @@
 
     </section>
 
-    <!-- ==================== STEP 3: OFFCUT 재고 & 이력 관리 ==================== -->
+    <!-- ==================== STEP 3: 통합 표(Table) 기반 원장 & OFFCUT 재고 관리 ==================== -->
     <section id="stepView3" class="hidden space-y-8">
 
-      <!-- 3-A. 전체 색상 오프컷 한눈에 보기 (클릭하여 색상 선택) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+      <!-- 3-A. 프로파일 종류 필터 + 색상별 표준 원장 & OFFCUT 통합 관리 표 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400" id="s3BadgeOverview">INVENTORY OVERVIEW</span>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s3OverviewTitle">
-              전체 색상 OFFCUT 보유 현황
+            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">INVENTORY TABLE</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5" id="s3TableTitle">
+              프로파일 & 색상별 표준 원장 / OFFCUT 통합 재고 관리표
             </h2>
+            <p class="text-sm text-slate-400 mt-1" id="s3TableSubtitle">
+              프로파일 종류(Hood, Tray, Basic Front, Kompakt Front, Kompakt Bottom)와 색상별로 원장 및 오프컷을 관리합니다.
+            </p>
           </div>
-          <span class="text-sm text-slate-400" id="s3OverviewHint">
-            색상 카드를 클릭하면 아래에서 해당 색상의 재고를 직접 추가/수정할 수 있습니다.
-          </span>
+
+          <!-- 원장 수량 제한 토글 (항상 켜진 상태로 유지) -->
+          <div class="flex items-center gap-3 bg-slate-950/90 border border-cyan-500/40 rounded-2xl px-4 py-3">
+            <input type="checkbox" id="useRawStockLimitToggle" checked disabled class="w-5 h-5 accent-cyan-400 cursor-not-allowed opacity-100" />
+            <div>
+              <div class="text-sm font-extrabold text-cyan-300" id="s3RawLimitTitle">표준 원장 재고 수량 차감 사용</div>
+              <div class="text-xs text-slate-400" id="s3RawLimitDesc">표에 입력된 원장 수량 한도 내에서만 커팅을 추천하며 확정 시 자동 차감됩니다.</div>
+            </div>
+          </div>
         </div>
 
-        <div id="allColorOffcutOverview" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- JS Rendered -->
+        <!-- 프로파일 종류 탭 선택 (재고 표 필터) -->
+        <div>
+          <div class="text-xs font-extrabold text-slate-400 mb-2" id="s3ProfileTabLabel">관리할 프로파일 종류 선택:</div>
+          <div class="flex flex-wrap gap-2" id="inventoryProfileTabs">
+            <!-- JS Rendered -->
+          </div>
+        </div>
+
+        <!-- 통합 재고 관리 테이블 -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+          <table class="w-full text-left border-collapse">
+            <thead id="inventoryMasterTableHead">
+              <tr class="bg-slate-900/90 border-b border-slate-800 text-xs sm:text-sm font-extrabold text-slate-300">
+                <th class="py-4 px-4 w-44" id="thColor">색상 (Color)</th>
+                <th class="py-4 px-3 text-center w-24" id="thRaw4700">원장 4,700</th>
+                <th class="py-4 px-3 text-center w-24" id="thRaw5700">원장 5,700</th>
+                <th class="py-4 px-3 text-center w-24" id="thRaw5800">원장 5,800</th>
+                <th class="py-4 px-3 text-center w-24" id="thRaw6700">원장 6,700</th>
+                <th class="py-4 px-3 text-center w-24" id="thRaw11000">원장 11,000</th>
+                <th class="py-4 px-4" id="thOffcutList">보유 OFFCUT 목록 및 빠른 추가</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryMasterTableBody" class="divide-y divide-slate-800/80 text-sm">
+              <!-- JS Rendered -->
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- 3-B. 선택된 색상 상세 재고 관리 (OFFCUT 수동 등록 & 표준 원장 설정) -->
+      <!-- 3-B. 전체 프로파일 보유 OFFCUT 상세 일람표 -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
           <div>
-            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
-              <span id="s3SelectedColorStockTitle">[WHITE] 재고 상세 관리</span>
+            <h3 class="text-lg sm:text-xl font-extrabold text-white" id="s3OffcutDetailTableTitle">
+              📋 전체 보유 OFFCUT 상세 일람표
             </h3>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5" id="s3OffcutDetailTableDesc">
+              등록된 모든 오프컷을 프로파일 종류, 색상, 길이별로 정리한 표입니다.
+            </p>
           </div>
-          <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-sm">
-            <button id="tabBtnOffcut" onclick="switchStockTab('offcut')" class="px-4 py-2 rounded-lg font-extrabold bg-emerald-500 text-slate-950 transition">
-              OFFCUT 재고
-            </button>
-            <button id="tabBtnRaw" onclick="switchStockTab('raw')" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition">
-              표준 원장(신규)
+
+          <!-- 빠른 오프컷 추가 바 -->
+          <div class="flex flex-wrap items-center gap-2 bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5">
+            <select id="quickOffcutProfileSelect" class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-cyan-300 font-extrabold text-sm focus:outline-none focus:border-emerald-400">
+              <!-- JS Rendered -->
+            </select>
+            <select id="quickOffcutColorSelect" class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-sm focus:outline-none focus:border-emerald-400">
+              <!-- JS Rendered -->
+            </select>
+            <input type="number" id="manualOffcutLen" placeholder="길이 (mm)" min="500" max="11000"
+              class="w-28 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-sm focus:outline-none focus:border-emerald-400"
+              onkeydown="if(event.key==='Enter') addManualOffcut()" />
+            <input type="number" id="manualOffcutQty" value="1" min="1" max="999" placeholder="수량"
+              class="w-20 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-sm focus:outline-none focus:border-emerald-400"
+              onkeydown="if(event.key==='Enter') addManualOffcut()" />
+            <button onclick="addManualOffcut()"
+              class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm transition">
+              <span id="s3BtnAddOffcut">+ 오프컷 추가</span>
             </button>
           </div>
         </div>
 
-        <!-- OFFCUT 수동 추가 및 목록 -->
-        <div id="stockTabOffcut" class="space-y-5">
-          <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-5">
-            <div class="text-sm font-bold text-emerald-300 mb-3" id="s3ManualAddTitle">
-              + 보유 중인 OFFCUT 수동 등록
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-              <div class="sm:col-span-5">
-                <label class="block text-xs text-slate-400 mb-1" id="s3LabelOffcutLen">오프컷 길이 (mm)</label>
-                <input type="number" id="manualOffcutLen" placeholder="3400" min="500" max="11000"
-                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-base focus:outline-none focus:border-emerald-400" />
-              </div>
-              <div class="sm:col-span-3">
-                <label class="block text-xs text-slate-400 mb-1" id="s3LabelOffcutQty">수량 (Qty)</label>
-                <input type="number" id="manualOffcutQty" value="1" min="1" max="999"
-                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-base focus:outline-none focus:border-emerald-400" />
-              </div>
-              <div class="sm:col-span-4">
-                <button onclick="addManualOffcut()"
-                  class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base transition">
-                  <span id="s3BtnAddOffcut">+ 오프컷 등록</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div id="offcutListContainer" class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
-            <!-- JS Rendered -->
-          </div>
-        </div>
-
-        <!-- 표준 원장 수량 관리 -->
-        <div id="stockTabRaw" class="hidden space-y-4">
-          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-4">
-            <div>
-              <div class="text-base font-bold text-slate-200" id="s3RawLimitTitle">표준 원장 수량 제한 사용</div>
-              <div class="text-xs text-slate-400 mt-0.5" id="s3RawLimitDesc">해제 시 표준 원장(4700/5700/6700/11000)은 상시 무제한 보유로 계산합니다.</div>
-            </div>
-            <input type="checkbox" id="useRawStockLimitToggle" onchange="toggleRawStockLimit()" class="w-5 h-5 accent-cyan-400 cursor-pointer" />
-          </div>
-          <div id="rawStockListContainer" class="space-y-2.5">
-            <!-- JS Rendered -->
-          </div>
+        <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/90 border-b border-slate-800 text-xs sm:text-sm font-extrabold text-slate-300">
+                <th class="py-3.5 px-4" id="thOcProfile">프로파일 종류</th>
+                <th class="py-3.5 px-4" id="thOcColor">색상</th>
+                <th class="py-3.5 px-4" id="thOcLength">오프컷 길이 (mm)</th>
+                <th class="py-3.5 px-4" id="thOcStatus">재사용 등급</th>
+                <th class="py-3.5 px-4 text-center" id="thOcQty">보유 수량</th>
+                <th class="py-3.5 px-4 text-right" id="thOcAction">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="offcutFlatTableBody" class="divide-y divide-slate-800/80 text-sm">
+              <!-- JS Rendered -->
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -416,7 +471,7 @@
         </div>
         <div>
           <label class="block font-bold text-slate-200 mb-1.5" id="modalLabelUsable">권장 재사용 최소 길이 (Min Usable Offcut, ≥ mm)</label>
-          <input type="number" id="settingUsableMin" value="2000" min="500" max="6000"
+          <input type="number" id="settingUsableMin" value="3000" min="500" max="6000"
             class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white font-bold text-base" />
         </div>
         <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
@@ -440,208 +495,77 @@
 
   <script>
     /*************************************************************************
-     * 1. 다국어(KO / EN) 번역 사전 및 상수 정의
+     * 1. 제품 종류(4종) & 프로파일 종류(9종) 및 공제(Deduction) 규칙 정의
      *************************************************************************/
-    const STORAGE_KEY = 'OFFCUT_MANAGER_STATE_V3';
+    const STORAGE_KEY = 'OFFCUT_MANAGER_STATE_V8';
 
-    const I18N = {
-      ko: {
-        headerTitle: '프로파일 커팅 & OFFCUT 가이드',
-        headerSubtitle: (kerf, scrap, usable) => `톱날 두께 ${kerf}mm 차감 · 잔여 ≤${scrap}mm 폐기 · 권장 오프컷 ≥${usable}mm`,
-        langToggleText: 'English',
-        btnSettingsText: '⚙️ 기준 설정',
-        btnBackupText: '💾 백업',
-        btnRestoreText: '📂 복원',
-        stepTitle1: '1. 작업지시서 입력',
-        stepDesc1: '색상 선택 및 커팅 치수 추가',
-        stepTitle2: '2. 최적 커팅 가이드',
-        stepDesc2: '원장 추천 확인 및 커팅 확정',
-        stepTitle3: '3. OFFCUT 재고 관리',
-        stepDesc3: '보유 오프컷 수정 및 이력',
-        s1SelectColorTitle: '프로파일 색상을 선택하세요',
-        s1SelectColorHint: '색상별로 커팅 대기 목록이 각각 따로 저장됩니다.',
-        s1InputLengthTitle: (colorName) => `[${colorName}] 커팅 길이와 수량을 입력하세요`,
-        s1StdLengthInfo: (lens) => `표준 원장: ${lens} mm`,
-        labelCutLength: '커팅 길이 (mm)',
-        labelCutQty: '수량 (개)',
-        btnAddItemText: '목록에 추가',
-        labelQuickAdd: '빠른 입력:',
-        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] 대기 목록 (${count}건)`,
-        totalAllColorsOrderBadge: (total) => `전체 색상 합계 ${total}건`,
-        btnClearCurrentColor: '현재 색상 비우기',
-        btnClearAllColors: '전체 비우기',
-        emptyColorOrder: (colorName) => `현재 ${colorName} 색상에 입력된 커팅 목록이 없습니다.`,
-        otherColorsSummaryLabel: '다른 색상에 대기 중인 커팅 목록 (클릭하여 전환):',
-        btnCalcSingleColor: '🔍 현재 색상만 가이드 보기 →',
-        btnCalcAllColors: '⚡ 다음 단계: 최적 커팅 가이드 확인 →',
-        btnBackToStep1: '← 1단계: 커팅 치수 수정하기',
-        btnPrintGuide: '🖨️ 작업지시서 인쇄',
-        applyAllBtn: (cnt) => `✅ 표시된 ${cnt}개 색상 전체 커팅 확정 (재고 반영)`,
-        applySingleBtn: (color) => `✅ [${color}] 가이드대로 커팅 확정 (재고 반영)`,
-        kpiUsedOffcut: '우선 사용하는 OFFCUT',
-        kpiUsedRaw: '신규 투입 표준 원장',
-        kpiNewOffcut: '새로 남는 보관용 오프컷',
-        kpiScrapLoss: (scrap) => `폐기 손실 (≤${scrap}mm)`,
-        unitPcs: '개',
-        compTitle: (color, len) => `💡 [${color}] ${len.toLocaleString()}mm 커팅 시 왜 이 원장이 선택되었나요?`,
-        compKerfNote: (kerf) => `톱날 ${kerf}mm 차감 반영`,
-        compRecommended: '추천 선택',
-        compRemainder: (rem, kerf) => `잔여: ${rem.toLocaleString()}mm (날 ${kerf}mm)`,
-        sourceOffcut: '♻️ 1순위: 보유 OFFCUT 사용',
-        sourceRaw: '📏 신규 표준 프로파일 사용',
-        sourceShortOffcut: '♻️ 오프컷 ',
-        sourceShortRaw: '📏 원장 ',
-        sameWorkCount: (cnt) => `동일 작업 × ${cnt}본`,
-        cutDetailsLabel: '✂️ 커팅 내역:',
-        kerfDetailsLabel: '⚙️ 톱날 소모:',
-        cutsUnit: '컷',
-        timesUnit: '회',
-        btnApplyThisColorOnly: (color) => `✓ ${color}만 먼저 확정`,
-        guideSectionTitle: (color, korName) => `${color} (${korName}) 커팅 가이드`,
-        guideTotalBars: (cnt) => `총 ${cnt}본 작업`,
-        unfulfilledTitle: '⚠️ 커팅 불가능한 치수가 있습니다!',
-        unfulfilledDesc: '최대 원장 길이 초과 또는 재고 부족:',
-        noGuideYetTitle: '대기 중인 커팅 목록이 없습니다.',
-        noGuideYetDesc: '1단계에서 색상을 선택하고 커팅 길이를 추가해 주세요.',
-        s3OverviewTitle: '전체 색상 OFFCUT 보유 현황',
-        s3OverviewHint: '색상 카드를 클릭하면 아래에서 해당 색상의 재고를 직접 추가/수정할 수 있습니다.',
-        s3SelectedColorStockTitle: (color) => `[${color}] 재고 상세 관리`,
-        tabOffcut: 'OFFCUT 재고',
-        tabRaw: '표준 원장(신규)',
-        s3ManualAddTitle: (color) => `+ [${color}] 보유 중인 OFFCUT 수동 등록`,
-        s3LabelOffcutLen: '오프컷 길이 (mm)',
-        s3LabelOffcutQty: '수량 (개)',
-        s3BtnAddOffcut: '+ 오프컷 등록',
-        s3RawLimitTitle: '표준 원장 수량 제한 사용',
-        s3RawLimitDesc: '해제 시 표준 원장(4700/5700/6700/11000)은 상시 무제한 보유로 계산합니다.',
-        rawUnlimited: '상시 보유 (무제한)',
-        rawStdLabel: '표준 원장',
-        s3HistoryTitle: '최근 커팅 확정 기록',
-        s3BtnClearHistory: '기록 초기화',
-        emptyOffcutStock: (color) => `현재 ${color} 색상의 보유 OFFCUT 재고가 없습니다.`,
-        emptyHistory: '아직 확정된 커팅 작업 이력이 없습니다.',
-        badgeWaitCuts: (cnt) => `대기 ${cnt}컷`,
-        badgeOffcutCnt: (cnt) => `오프컷 ${cnt}`,
-        noOffcuts: '보유 오프컷 없음',
-        belowMinWidth: (min) => `최소너비(${min}) 미만`,
-        remNewOffcut: '신규 오프컷 보관',
-        remScrap: (max) => `폐기 (≤${max})`,
-        remAwkward: (min) => `오프컷 (${min}미만)`,
-        outPerfect: '잔여 0mm (완벽 소진)',
-        outScrap: (rem, max) => `잔여 ${rem.toLocaleString()}mm → 폐기 (≤${max}mm)`,
-        outUsable: (rem) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 재고 등록 (재사용 우수)`,
-        outAwkward: (rem, min) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 등록 (${min}mm 미만)`,
-        reasonPerfect: '잔여 없이 완벽 소진',
-        reasonScrap: (rem, max) => `잔여 ${rem}mm (≤${max}mm 폐기)`,
-        reasonUsable: (rem, min) => `잔여 ${rem}mm (≥${min}mm 재사용 가능 오프컷)`,
-        reasonAwkward: (rem, min) => `잔여 ${rem}mm (${min}mm 미만으로 재사용 어려움 · 비추천)`,
-        modalSettingsTitle: '⚙️ 커팅 및 오프컷 기준 설정',
-        modalLabelKerf: '커팅날 두께 (Blade Kerf, mm)',
-        modalLabelScrap: '폐기 기준 잔여 길이 (Scrap Threshold, ≤ mm)',
-        modalLabelUsable: '권장 재사용 최소 길이 (Min Usable Offcut, ≥ mm)',
-        modalBtnReset: '초기화 (Reset)',
-        modalBtnCancel: '취소',
-        modalBtnSave: '저장'
+    // 프로파일 정의 (일반 5종 + Millennium 전용 4종)
+    // Millennium 전용 프로파일은 MILL FINISH (5,800mm) 원장만 보유
+    const PROFILE_TYPES = [
+      { id: 'HOOD', name: 'Hood', badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40', isMillennium: false },
+      { id: 'TRAY', name: 'Tray', badgeClass: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40', isMillennium: false },
+      { id: 'BASIC_FRONT', name: 'Basic Front', badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', isMillennium: false },
+      { id: 'KOMPAKT_FRONT', name: 'Kompakt Front', badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40', isMillennium: false },
+      { id: 'KOMPAKT_BOTTOM', name: 'Kompakt Bottom', badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/40', isMillennium: false },
+      { id: 'MILLENNIUM_HOOD', name: 'Millennium Hood', badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40', isMillennium: true, onlyColors: ['MILL FINISH'], customStdLengths: { 'MILL FINISH': [5800] } },
+      { id: 'MILLENNIUM_BOTTOM', name: 'Millennium Bottom', badgeClass: 'bg-teal-500/20 text-teal-300 border-teal-500/40', isMillennium: true, onlyColors: ['MILL FINISH'], customStdLengths: { 'MILL FINISH': [5800] } },
+      { id: 'MILLENNIUM_TRAY', name: 'Millennium Tray', badgeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/40', isMillennium: true, onlyColors: ['MILL FINISH'], customStdLengths: { 'MILL FINISH': [5800] } },
+      { id: 'MILLENNIUM_FRONT', name: 'Millennium Front', badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40', isMillennium: true, onlyColors: ['MILL FINISH'], customStdLengths: { 'MILL FINISH': [5800] } }
+    ];
+
+    // 제품 4종 및 자동 계산 공식 정의
+    // - Family Basic / Titan 동일: Hood = W - 40, Tray = W - 40, Basic Front = W - 98
+    // - Kompakt: Hood = W - 40, Tray = W - 40, Kompakt Front = W - 88, Kompakt Bottom = W - 40
+    // - Millennium: Millennium Hood(-35), Millennium Bottom(-35), Millennium Tray(-35), Millennium Front(-75) / 5800mm MF 전용
+    const PRODUCT_TYPES = [
+      {
+        id: 'FAMILY_BASIC',
+        name: 'Family Basic',
+        descKo: 'Hood(-40) · Tray(-40) · Basic Front(-98)',
+        descEn: 'Hood(-40) · Tray(-40) · Basic Front(-98)',
+        recipes: [
+          { profileId: 'HOOD', deduction: 40, defaultChecked: true },
+          { profileId: 'TRAY', deduction: 40, defaultChecked: true },
+          { profileId: 'BASIC_FRONT', deduction: 98, defaultChecked: true }
+        ]
       },
-      en: {
-        headerTitle: 'Profile Cutting & OFFCUT Guide',
-        headerSubtitle: (kerf, scrap, usable) => `Blade Kerf ${kerf}mm · Scrap ≤${scrap}mm · Recommended Offcut ≥${usable}mm`,
-        langToggleText: '한국어',
-        btnSettingsText: '⚙️ Settings',
-        btnBackupText: '💾 Backup',
-        btnRestoreText: '📂 Restore',
-        stepTitle1: '1. Work Order Input',
-        stepDesc1: 'Select color & enter cut lengths',
-        stepTitle2: '2. Optimal Cutting Guide',
-        stepDesc2: 'Review bar selection & confirm cuts',
-        stepTitle3: '3. OFFCUT Inventory',
-        stepDesc3: 'Manage offcut stock & history',
-        s1SelectColorTitle: 'Select Profile Color / Finish',
-        s1SelectColorHint: 'Cutting queues are saved separately for each color.',
-        s1InputLengthTitle: (colorName) => `Add Cut Length & Quantity for [${colorName}]`,
-        s1StdLengthInfo: (lens) => `Standard Stock: ${lens} mm`,
-        labelCutLength: 'Cut Length (mm)',
-        labelCutQty: 'Quantity (pcs)',
-        btnAddItemText: 'Add to Queue',
-        labelQuickAdd: 'Quick Add:',
-        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] Cutting Queue (${count} pcs)`,
-        totalAllColorsOrderBadge: (total) => `All Colors Total: ${total} pcs`,
-        btnClearCurrentColor: 'Clear Current Color',
-        btnClearAllColors: 'Clear All Colors',
-        emptyColorOrder: (colorName) => `No cutting items queued for ${colorName}.`,
-        otherColorsSummaryLabel: 'Pending queues in other colors (click to switch):',
-        btnCalcSingleColor: '🔍 View Guide for Current Color Only →',
-        btnCalcAllColors: '⚡ Next Step: View Optimal Cutting Guide →',
-        btnBackToStep1: '← Step 1: Edit Cut Lengths',
-        btnPrintGuide: '🖨️ Print Work Order',
-        applyAllBtn: (cnt) => `✅ Confirm All ${cnt} Colors & Update Stock`,
-        applySingleBtn: (color) => `✅ Confirm [${color}] Cuts & Update Stock`,
-        kpiUsedOffcut: 'Existing OFFCUTs Used',
-        kpiUsedRaw: 'New Standard Bars Used',
-        kpiNewOffcut: 'New Reusable OFFCUTs',
-        kpiScrapLoss: (scrap) => `Scrap Loss (≤${scrap}mm)`,
-        unitPcs: 'pcs',
-        compTitle: (color, len) => `💡 Why was this profile selected for [${color}] ${len.toLocaleString()}mm?`,
-        compKerfNote: (kerf) => `${kerf}mm blade kerf applied`,
-        compRecommended: 'BEST CHOICE',
-        compRemainder: (rem, kerf) => `Remainder: ${rem.toLocaleString()}mm (Kerf ${kerf}mm)`,
-        sourceOffcut: '♻️ Priority 1: Use Existing OFFCUT',
-        sourceRaw: '📏 Use New Standard Profile',
-        sourceShortOffcut: '♻️ Offcut ',
-        sourceShortRaw: '📏 Stock ',
-        sameWorkCount: (cnt) => `Repeat × ${cnt} bar(s)`,
-        cutDetailsLabel: '✂️ Cuts:',
-        kerfDetailsLabel: '⚙️ Blade Kerf:',
-        cutsUnit: 'cut(s)',
-        timesUnit: 'cut(s)',
-        btnApplyThisColorOnly: (color) => `✓ Confirm ${color} Only`,
-        guideSectionTitle: (color) => `${color} Cutting Guide`,
-        guideTotalBars: (cnt) => `Total ${cnt} bar(s)`,
-        unfulfilledTitle: '⚠️ Uncuttable Lengths Detected!',
-        unfulfilledDesc: 'Exceeds max profile length or insufficient stock:',
-        noGuideYetTitle: 'No cutting items in queue.',
-        noGuideYetDesc: 'Please go to Step 1 and add cut lengths.',
-        s3OverviewTitle: 'All Colors OFFCUT Inventory',
-        s3OverviewHint: 'Click any color card below to add or edit its offcut stock.',
-        s3SelectedColorStockTitle: (color) => `[${color}] Stock Management`,
-        tabOffcut: 'OFFCUT Stock',
-        tabRaw: 'Standard Bars',
-        s3ManualAddTitle: (color) => `+ Manually Add [${color}] OFFCUT`,
-        s3LabelOffcutLen: 'Offcut Length (mm)',
-        s3LabelOffcutQty: 'Quantity (pcs)',
-        s3BtnAddOffcut: '+ Add Offcut',
-        s3RawLimitTitle: 'Limit Standard Bar Quantities',
-        s3RawLimitDesc: 'When unchecked, standard profiles (4700/5700/6700/11000) are assumed unlimited.',
-        rawUnlimited: 'Unlimited Stock',
-        rawStdLabel: 'Standard Bar',
-        s3HistoryTitle: 'Recent Confirmed Cutting History',
-        s3BtnClearHistory: 'Clear History',
-        emptyOffcutStock: (color) => `No OFFCUT stock currently registered for ${color}.`,
-        emptyHistory: 'No confirmed cutting history yet.',
-        badgeWaitCuts: (cnt) => `Queue ${cnt}`,
-        badgeOffcutCnt: (cnt) => `Offcut ${cnt}`,
-        noOffcuts: 'No offcuts in stock',
-        belowMinWidth: (min) => `Below min (${min}mm)`,
-        remNewOffcut: 'Save as Offcut',
-        remScrap: (max) => `Scrap (≤${max})`,
-        remAwkward: (min) => `Offcut (<${min})`,
-        outPerfect: 'Remainder 0mm (Zero Waste)',
-        outScrap: (rem, max) => `Rem ${rem.toLocaleString()}mm → Scrap (≤${max}mm)`,
-        outUsable: (rem) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (Reusable)`,
-        outAwkward: (rem, min) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (<${min}mm)`,
-        reasonPerfect: 'Zero waste!',
-        reasonScrap: (rem, max) => `Rem ${rem}mm (Scrap ≤${max}mm)`,
-        reasonUsable: (rem, min) => `Rem ${rem}mm (Reusable Offcut ≥${min}mm)`,
-        reasonAwkward: (rem, min) => `Rem ${rem}mm (Hard to reuse <${min}mm · Avoid)`,
-        modalSettingsTitle: '⚙️ Cutting & Offcut Rules',
-        modalLabelKerf: 'Blade Kerf Thickness (mm)',
-        modalLabelScrap: 'Scrap Threshold (Discard if ≤ mm)',
-        modalLabelUsable: 'Recommended Min Reusable Offcut (≥ mm)',
-        modalBtnReset: 'Reset All Data',
-        modalBtnCancel: 'Cancel',
-        modalBtnSave: 'Save'
+      {
+        id: 'TITAN',
+        name: 'Titan',
+        descKo: 'Family Basic과 동일: Hood(-40) · Tray(-40) · Basic Front(-98)',
+        descEn: 'Same as Family Basic: Hood(-40) · Tray(-40) · Basic Front(-98)',
+        recipes: [
+          { profileId: 'HOOD', deduction: 40, defaultChecked: true },
+          { profileId: 'TRAY', deduction: 40, defaultChecked: true },
+          { profileId: 'BASIC_FRONT', deduction: 98, defaultChecked: true }
+        ]
+      },
+      {
+        id: 'KOMPAKT',
+        name: 'Kompakt',
+        descKo: 'Hood(-40) · Tray(-40) · Kompakt Front(-88) · Kompakt Bottom(-40)',
+        descEn: 'Hood(-40) · Tray(-40) · Kompakt Front(-88) · Kompakt Bottom(-40)',
+        recipes: [
+          { profileId: 'HOOD', deduction: 40, defaultChecked: true },
+          { profileId: 'TRAY', deduction: 40, defaultChecked: true },
+          { profileId: 'KOMPAKT_FRONT', deduction: 88, defaultChecked: true },
+          { profileId: 'KOMPAKT_BOTTOM', deduction: 40, defaultChecked: true }
+        ]
+      },
+      {
+        id: 'MILLENNIUM',
+        name: 'Millennium',
+        descKo: '5,800mm MF 전용 · Hood(-35) · Bottom(-35) · Tray(-35) · Front(-75)',
+        descEn: '5,800mm MF Only · Hood(-35) · Bottom(-35) · Tray(-35) · Front(-75)',
+        onlyColors: ['MILL FINISH'],
+        recipes: [
+          { profileId: 'MILLENNIUM_HOOD', deduction: 35, defaultChecked: true },
+          { profileId: 'MILLENNIUM_BOTTOM', deduction: 35, defaultChecked: true },
+          { profileId: 'MILLENNIUM_TRAY', deduction: 35, defaultChecked: true },
+          { profileId: 'MILLENNIUM_FRONT', deduction: 75, defaultChecked: true }
+        ]
       }
-    };
+    ];
 
     const PROFILE_COLORS = [
       {
@@ -686,35 +610,304 @@
       }
     ];
 
+    const I18N = {
+      ko: {
+        headerTitle: '프로파일 커팅 & OFFCUT 가이드',
+        headerSubtitle: (kerf, scrap, usable) => `톱날 두께 ${kerf}mm 차감 · 잔여 ≤${scrap}mm 폐기 · 권장 오프컷 ≥${usable}mm`,
+        langToggleText: 'English',
+        btnSettingsText: '⚙️ 기준 설정',
+        btnBackupText: '💾 백업',
+        btnRestoreText: '📂 복원',
+        stepTitle1: '1. 작업지시서 입력',
+        stepDesc1: '제품/Width 입력 및 프로파일 자동 계산',
+        stepTitle2: '2. 최적 커팅 가이드',
+        stepDesc2: '프로파일별 원장 추천 및 커팅 확정',
+        stepTitle3: '3. 재고 관리 (표)',
+        stepDesc3: '프로파일/색상별 원장 & 오프컷 표',
+        s1ProductSectionTitle: '제품의 종류와 가로 폭(Width), 색상을 선택하세요',
+        s1LabelProductType: 'a. 제품 종류 선택 (Product Type)',
+        s1LabelColorSelect: 'b. 프로파일 색상 선택 (Profile Color)',
+        s1StdLengthInfo: (lens) => `표준 원장: ${lens} mm`,
+        s1LabelWidthInput: 'c. 제품 가로 폭 (Width, 단위: mm)',
+        s1LabelSetQty: '수량 (대/Set)',
+        btnAddProductSetText: '자동 계산된 프로파일 담기',
+        s1AutoPreviewTitle: '제품별 프로파일 커팅 사이즈 자동 기입',
+        s1AutoPreviewHint: 'Width(mm)를 입력하면 아래 프로파일별 공제 치수가 자동 계산됩니다. 값이나 체크박스를 직접 조정할 수도 있습니다.',
+        thAutoUse: '포함',
+        thAutoProfile: '프로파일 종류 (Profile Type)',
+        thAutoFormula: '공제 공식 (Formula)',
+        thAutoCutSize: '자동 기입 커팅 사이즈 (mm)',
+        thAutoQty: '수량',
+        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] 대기 중인 커팅 목록 (${count}건)`,
+        totalAllColorsOrderBadge: (total) => `전체 색상 합계 ${total}건`,
+        btnClearCurrentColor: '현재 색상 비우기',
+        btnClearAllColors: '전체 비우기',
+        emptyColorOrder: (colorName) => `현재 ${colorName} 색상에 담긴 프로파일 커팅 목록이 없습니다. 위에서 Width를 입력하고 [+ 자동 계산된 프로파일 담기]를 눌러주세요.`,
+        otherColorsSummaryLabel: '다른 색상에 대기 중인 커팅 목록 (클릭하여 전환):',
+        btnCalcSingleColor: '🔍 현재 색상만 가이드 보기 →',
+        btnCalcAllColors: '⚡ 다음 단계: 최적 커팅 가이드 확인 →',
+        btnBackToStep1: '← 1단계: 제품/치수 추가 및 수정하기',
+        btnPrintGuide: '🖨️ 작업지시서 인쇄',
+        managerHintText: '현장에 추천된 길이의 프로파일 재고가 없다면, 각 작업 카드의 [🔄 다른 프로파일 길이로 변경]에서 직접 선택하거나 [🚫 현재 길이 품절 제외]를 누르세요.',
+        btnResetExclusions: (cnt) => `품절 제외 해제 (${cnt}건)`,
+        applyAllBtn: (cnt) => `✅ 표시된 전체 커팅 확정 (재고 반영)`,
+        applySingleBtn: (label) => `✅ [${label}] 가이드대로 커팅 확정 (재고 반영)`,
+        kpiUsedOffcut: '우선 사용하는 OFFCUT',
+        kpiUsedRaw: '신규 투입 표준 원장',
+        kpiNewOffcut: '새로 남는 보관용 오프컷',
+        kpiScrapLoss: (scrap) => `폐기 손실 (≤${scrap}mm)`,
+        unitPcs: '개',
+        sourceOffcut: '♻️ 1순위: 보유 OFFCUT 사용',
+        sourceRaw: '📏 신규 표준 프로파일 사용',
+        sourceManualOverride: '👷 현장 매니저 직접 선택',
+        sameWorkCount: (cnt) => `동일 작업 × ${cnt}본`,
+        cutDetailsLabel: '✂️ 커팅 내역:',
+        kerfDetailsLabel: '⚙️ 톱날 소모:',
+        cutsUnit: '컷',
+        timesUnit: '회',
+        btnApplyThisGroupOnly: (label) => `✓ ${label}만 먼저 확정`,
+        guideTotalBars: (cnt) => `총 ${cnt}본 작업`,
+        unfulfilledTitle: '⚠️ 커팅 불가능한 치수가 있습니다!',
+        unfulfilledDesc: '최대 원장 길이 초과 또는 선택 가능한 재고 부족:',
+        noGuideYetTitle: '대기 중인 커팅 목록이 없습니다.',
+        noGuideYetDesc: '1단계에서 제품과 Width(mm)를 입력하여 프로파일을 추가해 주세요.',
+        overrideBarLabel: '🔄 다른 프로파일 길이로 변경 (현장 재고 선택):',
+        btnMarkOutOfStock: '🚫 현재 길이 품절 제외 (자동 재계산)',
+        altSplitNeededBadge: (barsNeeded) => `1본당 1컷 분할 (총 ${barsNeeded}본 소요)`,
+        s3TableTitle: '프로파일 & 색상별 표준 원장 / OFFCUT 통합 재고 관리표',
+        s3TableSubtitle: '프로파일 종류(Hood, Tray, Basic Front, Kompakt Front, Kompakt Bottom)와 색상별로 원장 및 오프컷을 관리합니다.',
+        s3ProfileTabLabel: '관리할 프로파일 종류 선택:',
+        thColor: '색상 (Color)',
+        thRaw4700: '원장 4,700',
+        thRaw5700: '원장 5,700',
+        thRaw5800: '원장 5,800',
+        thRaw6700: '원장 6,700',
+        thRaw11000: '원장 11,000',
+        thOffcutList: '보유 OFFCUT 목록 및 빠른 추가',
+        s3OffcutDetailTableTitle: '📋 전체 보유 OFFCUT 상세 일람표',
+        s3OffcutDetailTableDesc: '현재 등록된 모든 오프컷을 프로파일 종류, 색상, 길이별로 정리한 표입니다.',
+        thOcProfile: '프로파일 종류',
+        thOcColor: '색상',
+        thOcLength: '오프컷 길이 (mm)',
+        thOcStatus: '재사용 등급',
+        thOcQty: '보유 수량',
+        thOcAction: '삭제',
+        ocGradeGood: (min) => `✅ 재사용 우수 (≥${min}mm)`,
+        ocGradeShort: (min) => `⚠️ 단척 오프컷 (<${min}mm)`,
+        s3BtnAddOffcut: '+ 오프컷 추가',
+        s3RawLimitTitle: '표준 원장 재고 수량 차감 사용',
+        s3RawLimitDesc: '체크 시 표에 입력된 원장 수량 한도 내에서만 커팅을 추천합니다.',
+        rawUnlimitedShort: '무제한',
+        s3HistoryTitle: '최근 커팅 확정 기록',
+        s3BtnClearHistory: '기록 초기화',
+        emptyOffcutTable: '현재 등록된 보유 OFFCUT 재고가 없습니다.',
+        emptyHistory: '아직 확정된 커팅 작업 이력이 없습니다.',
+        badgeWaitCuts: (cnt) => `대기 ${cnt}컷`,
+        badgeOffcutCnt: (cnt) => `오프컷 ${cnt}`,
+        noOffcuts: '보유 오프컷 없음',
+        remNewOffcut: '신규 오프컷 보관',
+        remScrap: (max) => `폐기 (≤${max})`,
+        remAwkward: (min) => `오프컷 (${min}미만)`,
+        outPerfect: '잔여 0mm (완벽 소진)',
+        outScrap: (rem, max) => `잔여 ${rem.toLocaleString()}mm → 폐기 (≤${max}mm)`,
+        outUsable: (rem) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 재고 등록 (재사용 우수)`,
+        outAwkward: (rem, min) => `잔여 ${rem.toLocaleString()}mm → OFFCUT 등록 (${min}mm 미만)`,
+        reasonPerfect: '잔여 0mm (완벽 소진)',
+        reasonScrap: (rem, max) => `잔여 ${rem}mm 폐기`,
+        reasonUsable: (rem, min) => `잔여 ${rem}mm (≥${min}mm 재사용 가능 오프컷)`,
+        reasonAwkward: (rem, min) => `잔여 ${rem}mm (${min}mm 미만 애매한 자투리)`,
+        modalSettingsTitle: '⚙️ 커팅 및 오프컷 기준 설정',
+        modalLabelKerf: '커팅날 두께 (Blade Kerf, mm)',
+        modalLabelScrap: '폐기 기준 잔여 길이 (Scrap Threshold, ≤ mm)',
+        modalLabelUsable: '권장 재사용 최소 길이 (Min Usable Offcut, ≥ mm)',
+        modalBtnReset: '초기화 (Reset)',
+        modalBtnCancel: '취소',
+        modalBtnSave: '저장'
+      },
+      en: {
+        headerTitle: 'Profile Cutting & OFFCUT Guide',
+        headerSubtitle: (kerf, scrap, usable) => `Blade Kerf ${kerf}mm · Scrap ≤${scrap}mm · Recommended Offcut ≥${usable}mm`,
+        langToggleText: '한국어',
+        btnSettingsText: '⚙️ Settings',
+        btnBackupText: '💾 Backup',
+        btnRestoreText: '📂 Restore',
+        stepTitle1: '1. Work Order Input',
+        stepDesc1: 'Select Product, Width & Auto-fill Profiles',
+        stepTitle2: '2. Optimal Cutting Guide',
+        stepDesc2: 'Review bar selection by profile & confirm',
+        stepTitle3: '3. Inventory Table',
+        stepDesc3: 'Manage bars & offcuts by profile & color',
+        s1ProductSectionTitle: 'Select Product Type, Width (mm), and Profile Color',
+        s1LabelProductType: 'a. Select Product Type',
+        s1LabelColorSelect: 'b. Select Profile Color',
+        s1StdLengthInfo: (lens) => `Standard Stock: ${lens} mm`,
+        s1LabelWidthInput: 'c. Product Width (Unit: mm)',
+        s1LabelSetQty: 'Qty (Sets)',
+        btnAddProductSetText: 'Add Auto-Calculated Profiles',
+        s1AutoPreviewTitle: 'Auto-Calculated Profile Cutting Sizes',
+        s1AutoPreviewHint: 'Enter Width (mm) above to auto-calculate profile lengths. You can also adjust values or checkboxes manually.',
+        thAutoUse: 'Use',
+        thAutoProfile: 'Profile Type',
+        thAutoFormula: 'Deduction Formula',
+        thAutoCutSize: 'Auto Cut Size (mm)',
+        thAutoQty: 'Qty',
+        currentOrderHeaderLabel: (colorName, count) => `[${colorName}] Cutting Queue (${count} pcs)`,
+        totalAllColorsOrderBadge: (total) => `All Colors Total: ${total} pcs`,
+        btnClearCurrentColor: 'Clear Current Color',
+        btnClearAllColors: 'Clear All Colors',
+        emptyColorOrder: (colorName) => `No profile cuts queued for ${colorName}. Enter Width above and click [+ Add Auto-Calculated Profiles].`,
+        otherColorsSummaryLabel: 'Pending queues in other colors (click to switch):',
+        btnCalcSingleColor: '🔍 View Guide for Current Color Only →',
+        btnCalcAllColors: '⚡ Next Step: View Optimal Cutting Guide →',
+        btnBackToStep1: '← Step 1: Edit Product / Cut Sizes',
+        btnPrintGuide: '🖨️ Print Work Order',
+        managerHintText: 'If the recommended profile length is out of stock on site, select another length in [🔄 Change Profile Length] on each card or click [🚫 Out of Stock].',
+        btnResetExclusions: (cnt) => `Reset Out-of-Stock Exclusions (${cnt})`,
+        applyAllBtn: (cnt) => `✅ Confirm All Displayed Cuts & Update Stock`,
+        applySingleBtn: (label) => `✅ Confirm [${label}] & Update Stock`,
+        kpiUsedOffcut: 'Existing OFFCUTs Used',
+        kpiUsedRaw: 'New Standard Bars Used',
+        kpiNewOffcut: 'New Reusable OFFCUTs',
+        kpiScrapLoss: (scrap) => `Scrap Loss (≤${scrap}mm)`,
+        unitPcs: 'pcs',
+        sourceOffcut: '♻️ Priority 1: Use Existing OFFCUT',
+        sourceRaw: '📏 Use New Standard Profile',
+        sourceManualOverride: '👷 Manager Manual Selection',
+        sameWorkCount: (cnt) => `Repeat × ${cnt} bar(s)`,
+        cutDetailsLabel: '✂️ Cuts:',
+        kerfDetailsLabel: '⚙️ Blade Kerf:',
+        cutsUnit: 'cut(s)',
+        timesUnit: 'cut(s)',
+        btnApplyThisGroupOnly: (label) => `✓ Confirm ${label} Only`,
+        guideTotalBars: (cnt) => `Total ${cnt} bar(s)`,
+        unfulfilledTitle: '⚠️ Uncuttable Lengths Detected!',
+        unfulfilledDesc: 'Exceeds max profile length or all valid bars excluded:',
+        noGuideYetTitle: 'No cutting items in queue.',
+        noGuideYetDesc: 'Please go to Step 1 and add product profiles.',
+        overrideBarLabel: '🔄 Change Profile Length (Manager Override):',
+        btnMarkOutOfStock: '🚫 Mark Out of Stock (Recalculate)',
+        altSplitNeededBadge: (barsNeeded) => `Split 1 cut/bar (${barsNeeded} bars total)`,
+        s3TableTitle: 'Master Inventory Table by Profile & Color',
+        s3TableSubtitle: 'Manage standard bars and offcut stock for each profile type (Hood, Tray, Basic Front, Kompakt Front, Kompakt Bottom).',
+        s3ProfileTabLabel: 'Select Profile Type to Manage:',
+        thColor: 'Color / Finish',
+        thRaw4700: 'Bar 4,700',
+        thRaw5700: 'Bar 5,700',
+        thRaw5800: 'Bar 5,800',
+        thRaw6700: 'Bar 6,700',
+        thRaw11000: 'Bar 11,000',
+        thOffcutList: 'OFFCUT Stock List & Quick Add',
+        s3OffcutDetailTableTitle: '📋 Detailed OFFCUT Inventory Table (All Profiles)',
+        s3OffcutDetailTableDesc: 'All registered offcuts sorted by profile type, color, and length.',
+        thOcProfile: 'Profile Type',
+        thOcColor: 'Color',
+        thOcLength: 'Offcut Length (mm)',
+        thOcStatus: 'Grade',
+        thOcQty: 'Quantity',
+        thOcAction: 'Delete',
+        ocGradeGood: (min) => `✅ Reusable (≥${min}mm)`,
+        ocGradeShort: (min) => `⚠️ Short (<${min}mm)`,
+        s3BtnAddOffcut: '+ Add Offcut',
+        s3RawLimitTitle: 'Track & Deduct Standard Bar Quantities',
+        s3RawLimitDesc: 'When checked, cutting recommendations are limited to available standard bar quantities.',
+        rawUnlimitedShort: 'Unlimited',
+        s3HistoryTitle: 'Recent Confirmed Cutting History',
+        s3BtnClearHistory: 'Clear History',
+        emptyOffcutTable: 'No OFFCUT stock currently registered.',
+        emptyHistory: 'No confirmed cutting history yet.',
+        badgeWaitCuts: (cnt) => `Queue ${cnt}`,
+        badgeOffcutCnt: (cnt) => `Offcut ${cnt}`,
+        noOffcuts: 'No offcuts',
+        remNewOffcut: 'Save as Offcut',
+        remScrap: (max) => `Scrap (≤${max})`,
+        remAwkward: (min) => `Offcut (<${min})`,
+        outPerfect: 'Remainder 0mm (Zero Waste)',
+        outScrap: (rem, max) => `Rem ${rem.toLocaleString()}mm → Scrap (≤${max}mm)`,
+        outUsable: (rem) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (Reusable)`,
+        outAwkward: (rem, min) => `Rem ${rem.toLocaleString()}mm → Save to OFFCUT (<${min}mm)`,
+        reasonPerfect: 'Zero waste!',
+        reasonScrap: (rem, max) => `Rem ${rem}mm Scrap`,
+        reasonUsable: (rem, min) => `Rem ${rem}mm (Reusable Offcut ≥${min}mm)`,
+        reasonAwkward: (rem, min) => `Rem ${rem}mm (Hard to reuse <${min}mm)`,
+        modalSettingsTitle: '⚙️ Cutting & Offcut Rules',
+        modalLabelKerf: 'Blade Kerf Thickness (mm)',
+        modalLabelScrap: 'Scrap Threshold (Discard if ≤ mm)',
+        modalLabelUsable: 'Recommended Min Reusable Offcut (≥ mm)',
+        modalBtnReset: 'Reset All Data',
+        modalBtnCancel: 'Cancel',
+        modalBtnSave: 'Save'
+      }
+    };
+
+    /**
+     * 재고 키: 프로파일 종류(profileId)와 색상(colorId)별로 독립적인 원장 및 오프컷 재고를 관리합니다.
+     * key = `${profileId}__${colorId}`
+     */
+    function makeStockKey(profileId, colorId) {
+      return `${profileId}__${colorId}`;
+    }
+
+    /**
+     * 특정 프로파일 종류(profileId)와 색상(colorId) 조합에서 지원하는 표준 원장 길이 배열을 반환합니다.
+     * - Millennium 프로파일 4종(MILLENNIUM_HOOD/BOTTOM/TRAY/FRONT): MILL FINISH 색상만 보유하며, 원장 길이는 5,800mm 전용!
+     * - 일반 프로파일 5종: WHITE/BLACK/WOODLAND GREY/CHARCOAL은 4700/5700/6700mm, MILL FINISH는 11000mm
+     */
+    function getStandardLengthsForProfileAndColor(profileId, colorId) {
+      const pMeta = PROFILE_TYPES.find(p => p.id === profileId);
+      const cMeta = PROFILE_COLORS.find(c => c.id === colorId);
+      if (!pMeta || !cMeta) return [];
+
+      if (pMeta.onlyColors && !pMeta.onlyColors.includes(colorId)) {
+        return [];
+      }
+      if (pMeta.customStdLengths && pMeta.customStdLengths[colorId]) {
+        return pMeta.customStdLengths[colorId];
+      }
+      return cMeta.standardLengths;
+    }
+
     function getDefaultState() {
       const offcuts = {};
       const rawStocks = {};
       const ordersByColor = {};
 
-      PROFILE_COLORS.forEach(c => {
-        offcuts[c.id] = [];
-        rawStocks[c.id] = {};
-        ordersByColor[c.id] = [];
-        c.standardLengths.forEach(len => {
-          rawStocks[c.id][len] = 50;
+      PROFILE_TYPES.forEach(p => {
+        PROFILE_COLORS.forEach(c => {
+          const sKey = makeStockKey(p.id, c.id);
+          offcuts[sKey] = [];
+          rawStocks[sKey] = {};
+          const stdLens = getStandardLengthsForProfileAndColor(p.id, c.id);
+          stdLens.forEach(len => {
+            rawStocks[sKey][len] = 50;
+          });
         });
       });
 
+      PROFILE_COLORS.forEach(c => {
+        ordersByColor[c.id] = [];
+      });
+
+      // 초기 샘플 데이터: Family Basic 3500mm 1대분 (Hood 3460, Tray 3460, Basic Front 3402)
       ordersByColor['WHITE'] = [
-        { id: 'init-1', length: 3300, qty: 1 }
+        { id: 'init-h', productId: 'FAMILY_BASIC', productName: 'Family Basic', baseWidth: 3500, profileId: 'HOOD', length: 3460, qty: 1 },
+        { id: 'init-t', productId: 'FAMILY_BASIC', productName: 'Family Basic', baseWidth: 3500, profileId: 'TRAY', length: 3460, qty: 1 },
+        { id: 'init-bf', productId: 'FAMILY_BASIC', productName: 'Family Basic', baseWidth: 3500, profileId: 'BASIC_FRONT', length: 3402, qty: 1 }
       ];
 
       return {
-        lang: 'ko',       // 'ko' | 'en'
-        currentStep: 1,   // 1 | 2 | 3
+        lang: 'ko',
+        currentStep: 1,
+        selectedProduct: 'FAMILY_BASIC',
         selectedColor: 'WHITE',
-        guideMode: 'ALL', // 'SINGLE' | 'ALL'
-        stockTab: 'offcut',
-        useRawStockLimit: false,
+        selectedInventoryProfile: 'HOOD',
+        inputWidth: 3500,
+        inputSetQty: 1,
+        guideMode: 'ALL',
+        useRawStockLimit: true,
         settings: {
           kerf: 5,
           scrapMax: 1000,
-          usableMin: 2000
+          usableMin: 3000
         },
         offcuts,
         rawStocks,
@@ -725,36 +918,50 @@
 
     let state = loadState();
     let currentCalculatedPlans = [];
+    let excludedStocks = {};
+    // STEP 1-2 프리뷰 테이블의 임시 상태
+    let previewRowsState = [];
 
     function t() {
       return I18N[state.lang] || I18N.ko;
     }
 
+    function getProductMeta(productId) {
+      return PRODUCT_TYPES.find(p => p.id === productId) || PRODUCT_TYPES[0];
+    }
+
+    function getProfileMeta(profileId) {
+      return PROFILE_TYPES.find(p => p.id === profileId) || PROFILE_TYPES[0];
+    }
+
+    function getColorMeta(colorId) {
+      return PROFILE_COLORS.find(c => c.id === colorId) || PROFILE_COLORS[0];
+    }
+
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-          || localStorage.getItem('OFFCUT_MANAGER_STATE_V2')
-          || localStorage.getItem('OFFCUT_MANAGER_STATE_V1');
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return getDefaultState();
         const parsed = JSON.parse(raw);
         const def = getDefaultState();
 
-        const migratedOrdersByColor = { ...def.ordersByColor, ...(parsed.ordersByColor || {}) };
+        // Ensure all profileId__colorId keys exist
+        const mergedOffcuts = { ...def.offcuts, ...(parsed.offcuts || {}) };
+        const mergedRawStocks = { ...def.rawStocks, ...(parsed.rawStocks || {}) };
+        const mergedOrdersByColor = { ...def.ordersByColor, ...(parsed.ordersByColor || {}) };
+
         PROFILE_COLORS.forEach(c => {
-          if (!Array.isArray(migratedOrdersByColor[c.id])) {
-            migratedOrdersByColor[c.id] = [];
-          }
+          if (!Array.isArray(mergedOrdersByColor[c.id])) mergedOrdersByColor[c.id] = [];
         });
 
         return {
           ...def,
           ...parsed,
-          lang: parsed.lang || 'ko',
-          currentStep: parsed.currentStep || 1,
+          useRawStockLimit: true,
           settings: { ...def.settings, ...(parsed.settings || {}) },
-          offcuts: { ...def.offcuts, ...(parsed.offcuts || {}) },
-          rawStocks: { ...def.rawStocks, ...(parsed.rawStocks || {}) },
-          ordersByColor: migratedOrdersByColor
+          offcuts: mergedOffcuts,
+          rawStocks: mergedRawStocks,
+          ordersByColor: mergedOrdersByColor
         };
       } catch (e) {
         return getDefaultState();
@@ -773,11 +980,7 @@
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => {
         box.classList.add('hidden');
-      }, 2800);
-    }
-
-    function getColorMeta(colorId) {
-      return PROFILE_COLORS.find(c => c.id === colorId) || PROFILE_COLORS[0];
+      }, 3000);
     }
 
     function getColorOrders(colorId) {
@@ -793,64 +996,154 @@
       return PROFILE_COLORS.reduce((sum, c) => sum + getTotalOrderPiecesForColor(c.id), 0);
     }
 
+    function getTotalOffcutsForColor(colorId) {
+      let total = 0;
+      PROFILE_TYPES.forEach(p => {
+        const sKey = makeStockKey(p.id, colorId);
+        total += (state.offcuts[sKey] || []).reduce((acc, item) => acc + Number(item.qty), 0);
+      });
+      return total;
+    }
+
     /*************************************************************************
-     * 2. 언어 전환 & 단계(Step) 전환
+     * 2. 제품 선택 및 Width 기반 프로파일별 커팅 사이즈 자동 계산 로직
      *************************************************************************/
-    function toggleLanguage() {
-      state.lang = state.lang === 'ko' ? 'en' : 'ko';
-      saveState();
-      renderAll();
-      if (state.currentStep === 2) {
-        generateCuttingGuide(state.guideMode);
-      }
-    }
+    function initPreviewRowsForProduct(productId, widthVal, setQtyVal) {
+      const prod = getProductMeta(productId);
+      const w = Number(widthVal) || 0;
+      const q = Number(setQtyVal) || 1;
 
-    function goToStep(stepNum) {
-      state.currentStep = stepNum;
-      saveState();
-      renderStepperAndViews();
-      if (stepNum === 2) {
-        generateCuttingGuide(state.guideMode);
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function startGuideFromStep1(mode) {
-      state.guideMode = mode;
-      const count = mode === 'SINGLE'
-        ? getTotalOrderPiecesForColor(state.selectedColor)
-        : getTotalOrderPiecesAllColors();
-
-      if (count === 0) {
-        showToast(state.lang === 'ko'
-          ? '먼저 커팅할 길이와 수량을 1개 이상 추가해 주세요!'
-          : 'Please add at least one cut length to the queue first!');
-        return;
-      }
-      goToStep(2);
-    }
-
-    function renderStepperAndViews() {
-      const step = state.currentStep || 1;
-      [1, 2, 3].forEach(n => {
-        const view = document.getElementById(`stepView${n}`);
-        const btn = document.getElementById(`stepBtn${n}`);
-        const numBox = document.getElementById(`stepNum${n}`);
-
-        if (n === step) {
-          view.classList.remove('hidden');
-          btn.className = 'p-4 rounded-2xl border-2 border-cyan-400 bg-indigo-950/50 text-white transition flex items-center gap-3.5 shadow-lg shadow-cyan-500/10';
-          numBox.className = 'w-10 h-10 rounded-xl bg-cyan-400 text-slate-950 flex items-center justify-center font-extrabold text-lg shrink-0';
-        } else {
-          view.classList.add('hidden');
-          btn.className = 'p-4 rounded-2xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center gap-3.5';
-          numBox.className = 'w-10 h-10 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-extrabold text-lg shrink-0';
-        }
+      previewRowsState = prod.recipes.map(r => {
+        const cutLen = Math.max(0, w - r.deduction);
+        return {
+          profileId: r.profileId,
+          deduction: r.deduction,
+          checked: r.defaultChecked,
+          cutLength: cutLen,
+          qty: q
+        };
       });
     }
 
+    function selectProductType(productId) {
+      state.selectedProduct = productId;
+      // Millennium 제품은 5800mm MILL FINISH(MF)만 보유하므로 자동으로 MILL FINISH 색상으로 전환
+      if (productId === 'MILLENNIUM') {
+        state.selectedColor = 'MILL FINISH';
+      }
+      const widthInput = document.getElementById('productWidthInput');
+      const qtyInput = document.getElementById('productSetQtyInput');
+      const w = parseInt(widthInput?.value, 10) || state.inputWidth || 3500;
+      const q = parseInt(qtyInput?.value, 10) || state.inputSetQty || 1;
+      initPreviewRowsForProduct(productId, w, q);
+      saveState();
+      renderAll();
+    }
+
+    function updateAutoCalculatedProfiles() {
+      const widthInput = document.getElementById('productWidthInput');
+      const qtyInput = document.getElementById('productSetQtyInput');
+      const w = parseInt(widthInput.value, 10) || 0;
+      const q = Math.max(1, parseInt(qtyInput.value, 10) || 1);
+
+      state.inputWidth = w;
+      state.inputSetQty = q;
+
+      previewRowsState.forEach(row => {
+        row.cutLength = Math.max(0, w - row.deduction);
+        row.qty = q;
+      });
+
+      renderAutoProfilePreviewTable();
+    }
+
+    function togglePreviewRowCheck(idx, checked) {
+      if (previewRowsState[idx]) {
+        previewRowsState[idx].checked = checked;
+        renderAutoProfilePreviewTable();
+      }
+    }
+
+    function changePreviewRowCutLength(idx, newVal) {
+      if (previewRowsState[idx]) {
+        previewRowsState[idx].cutLength = Math.max(0, parseInt(newVal, 10) || 0);
+      }
+    }
+
+    function changePreviewRowQty(idx, newVal) {
+      if (previewRowsState[idx]) {
+        previewRowsState[idx].qty = Math.max(1, parseInt(newVal, 10) || 1);
+      }
+    }
+
+    function addProductOrderSet() {
+      const widthInput = document.getElementById('productWidthInput');
+      const w = parseInt(widthInput.value, 10) || 0;
+      if (w <= 100) {
+        showToast(state.lang === 'ko' ? '올바른 제품 가로 폭(Width, mm)을 입력해 주세요.' : 'Please enter a valid Product Width (mm).');
+        widthInput.focus();
+        return;
+      }
+
+      const prodMeta = getProductMeta(state.selectedProduct);
+      // Millennium 제품은 MILL FINISH 전용
+      if (prodMeta.onlyColors && !prodMeta.onlyColors.includes(state.selectedColor)) {
+        state.selectedColor = prodMeta.onlyColors[0];
+      }
+
+      const activeRows = previewRowsState.filter(r => r.checked && r.cutLength > 0);
+      if (activeRows.length === 0) {
+        showToast(state.lang === 'ko' ? '추가할 프로파일이 선택되지 않았습니다.' : 'No profiles selected to add.');
+        return;
+      }
+
+      // 각 프로파일별 최대 원장 길이 초과 검사
+      for (const r of activeRows) {
+        const stdLens = getStandardLengthsForProfileAndColor(r.profileId, state.selectedColor);
+        const maxStd = stdLens.length > 0 ? Math.max(...stdLens) : 0;
+        if (r.cutLength > maxStd) {
+          const pMeta = getProfileMeta(r.profileId);
+          showToast(
+            state.lang === 'ko'
+              ? `[${pMeta.name}: ${r.cutLength}mm] 최대 원장 길이(${maxStd.toLocaleString()}mm)를 초과합니다.`
+              : `[${pMeta.name}: ${r.cutLength}mm] Exceeds max standard length (${maxStd.toLocaleString()}mm).`
+          );
+          return;
+        }
+      }
+
+      const orderList = getColorOrders(state.selectedColor);
+      activeRows.forEach(r => {
+        // 같은 프로파일 종류 & 같은 커팅 길이가 있으면 수량 합산
+        const existing = orderList.find(
+          x => x.profileId === r.profileId && Number(x.length) === Number(r.cutLength) && x.productId === prodMeta.id && Number(x.baseWidth) === w
+        );
+        if (existing) {
+          existing.qty += Number(r.qty);
+        } else {
+          orderList.push({
+            id: 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            productId: prodMeta.id,
+            productName: prodMeta.name,
+            baseWidth: w,
+            profileId: r.profileId,
+            length: Number(r.cutLength),
+            qty: Number(r.qty)
+          });
+        }
+      });
+
+      saveState();
+      renderAll();
+      showToast(
+        state.lang === 'ko'
+          ? `✅ [${prodMeta.name} / Width ${w.toLocaleString()}mm] 프로파일 ${activeRows.length}종이 [${state.selectedColor}] 대기 목록에 추가되었습니다!`
+          : `✅ Added ${activeRows.length} profiles for [${prodMeta.name} / Width ${w.toLocaleString()}mm] to [${state.selectedColor}] queue!`
+      );
+    }
+
     /*************************************************************************
-     * 3. 커팅 최적화 엔진
+     * 3. 커팅 최적화 엔진 (프로파일 종류 + 색상별로 정확히 매칭하여 계산)
      *************************************************************************/
     function calculateBarRemainder(barLength, cuts, kerf) {
       const sumCuts = cuts.reduce((acc, v) => acc + v, 0);
@@ -901,13 +1194,14 @@
         status = 'SCRAP';
         nextOffcut = 0;
         scrapLoss = rem;
-        penalty = rem * 1.3;
+        penalty = rem * 1.0;
         reasonTag = dict.reasonScrap(rem, scrapMax);
       } else if (rem >= usableMin) {
         status = 'USABLE_OFFCUT';
         nextOffcut = rem;
         scrapLoss = 0;
-        penalty = 80 + (barLength * 0.015);
+        const usabilityBonus = Math.min(rem - usableMin, 1500) * 0.12;
+        penalty = 1250 - usabilityBonus;
         reasonTag = dict.reasonUsable(rem, usableMin);
       } else {
         status = 'AWKWARD_OFFCUT';
@@ -918,7 +1212,7 @@
       }
 
       if (cuts.length >= 2) {
-        penalty -= (cuts.length - 1) * 180;
+        penalty -= (cuts.length - 1) * 350;
       }
 
       if (barSourceType === 'OFFCUT') {
@@ -971,8 +1265,16 @@
       return bestEval;
     }
 
-    function solveCuttingPlanForColor(colorId, orderItems, stateObj) {
-      const colorMeta = getColorMeta(colorId);
+    function isStockExcluded(stockKey, sourceType, barLength) {
+      return !!excludedStocks[`${stockKey}_${sourceType}_${barLength}`];
+    }
+
+    /**
+     * 특정 색상(colorId) + 특정 프로파일 종류(profileId)에 대한 커팅 플랜 계산
+     */
+    function solveCuttingPlanForProfileAndColor(profileId, colorId, orderItems, stateObj) {
+      const stockKey = makeStockKey(profileId, colorId);
+      const supportedStdLengths = getStandardLengthsForProfileAndColor(profileId, colorId);
       const { kerf } = stateObj.settings;
 
       let neededPieces = [];
@@ -984,37 +1286,27 @@
       neededPieces.sort((a, b) => b - a);
 
       if (neededPieces.length === 0) {
-        return { colorId, steps: [], unfulfilled: [], singleComparisons: null };
+        return { stockKey, profileId, colorId, steps: [], unfulfilled: [] };
       }
 
       let availableOffcuts = [];
-      (stateObj.offcuts[colorId] || []).forEach(oc => {
+      (stateObj.offcuts[stockKey] || []).forEach(oc => {
+        if (isStockExcluded(stockKey, 'OFFCUT', Number(oc.length))) return;
         for (let i = 0; i < oc.qty; i++) {
           availableOffcuts.push({ id: oc.id, length: Number(oc.length) });
         }
       });
 
       let availableRawCounts = {};
-      colorMeta.standardLengths.forEach(len => {
-        availableRawCounts[len] = stateObj.useRawStockLimit
-          ? (stateObj.rawStocks[colorId]?.[len] ?? 0)
-          : 999999;
+      supportedStdLengths.forEach(len => {
+        if (isStockExcluded(stockKey, 'RAW', len)) {
+          availableRawCounts[len] = 0;
+        } else {
+          availableRawCounts[len] = stateObj.useRawStockLimit
+            ? (stateObj.rawStocks[stockKey]?.[len] ?? 0)
+            : 999999;
+        }
       });
-
-      let singleComparisons = null;
-      if (neededPieces.length >= 1) {
-        const samplePiece = neededPieces[0];
-        singleComparisons = { targetLength: samplePiece, options: [] };
-        const uniqueOffcutLens = [...new Set(availableOffcuts.map(o => o.length))].sort((a, b) => a - b);
-        uniqueOffcutLens.forEach(oLen => {
-          const ev = evaluatePatternScore('OFFCUT', oLen, [samplePiece], kerf, stateObj.settings);
-          if (ev) singleComparisons.options.push(ev);
-        });
-        colorMeta.standardLengths.forEach(sLen => {
-          const ev1 = evaluatePatternScore('RAW', sLen, [samplePiece], kerf, stateObj.settings);
-          if (ev1) singleComparisons.options.push(ev1);
-        });
-      }
 
       const steps = [];
       const unfulfilled = [];
@@ -1033,7 +1325,7 @@
         }
 
         if (!bestCandidate) {
-          for (const stdLen of colorMeta.standardLengths) {
+          for (const stdLen of supportedStdLengths) {
             if ((availableRawCounts[stdLen] || 0) <= 0) continue;
             const ev = findBestPatternForBar('RAW', stdLen, neededPieces, kerf, stateObj.settings);
             if (ev && (!bestCandidate || ev.scorePerPiece < bestCandidate.scorePerPiece)) {
@@ -1066,27 +1358,206 @@
         const key = `${st.barSourceType}_${st.barLength}_${st.cuts.join(',')}`;
         const existing = groupedSteps.find(g => g.key === key);
         if (existing) existing.count += 1;
-        else groupedSteps.push({ key, count: 1, ...st });
+        else groupedSteps.push({ key, count: 1, isManualOverride: false, ...st });
       });
 
       return {
+        stockKey,
+        profileId,
         colorId,
         steps: groupedSteps,
         rawStepsCount: steps.length,
-        unfulfilled,
-        singleComparisons
+        unfulfilled
       };
     }
 
+    function getAlternativeBarOptionsForStep(stockKey, profileId, colorId, step) {
+      const supportedStdLengths = getStandardLengthsForProfileAndColor(profileId, colorId);
+      const { kerf } = state.settings;
+      const options = [];
+
+      const offcutPool = (state.offcuts[stockKey] || []).filter(o => o.qty > 0).map(o => ({
+        sourceType: 'OFFCUT',
+        barLength: Number(o.length),
+        availQty: Number(o.qty)
+      }));
+      const rawPool = supportedStdLengths.map(len => ({
+        sourceType: 'RAW',
+        barLength: Number(len),
+        availQty: state.useRawStockLimit ? (state.rawStocks[stockKey]?.[len] ?? 0) : 999999
+      }));
+
+      const allCandidates = [...offcutPool, ...rawPool];
+      const allIdenticalCuts = step.cuts.every(c => c === step.cuts[0]);
+
+      allCandidates.forEach(cand => {
+        const fullEval = evaluatePatternScore(cand.sourceType, cand.barLength, step.cuts, kerf, state.settings);
+        if (fullEval) {
+          if (cand.sourceType === 'OFFCUT' && cand.availQty < step.count) return;
+          options.push({
+            ...fullEval,
+            splitMode: false,
+            newCount: step.count,
+            availQty: cand.availQty
+          });
+        } else if (step.cuts.length > 1 && allIdenticalCuts) {
+          const singleCut = [step.cuts[0]];
+          const totalBarsNeeded = step.count * step.cuts.length;
+          if (cand.sourceType === 'OFFCUT' && cand.availQty < totalBarsNeeded) return;
+          const splitEval = evaluatePatternScore(cand.sourceType, cand.barLength, singleCut, kerf, state.settings);
+          if (splitEval) {
+            options.push({
+              ...splitEval,
+              splitMode: true,
+              newCount: totalBarsNeeded,
+              availQty: cand.availQty
+            });
+          }
+        }
+      });
+
+      return options;
+    }
+
+    function overrideStepBarLength(stockKey, stepIdx, newSourceType, newBarLength, isSplitMode) {
+      const plan = currentCalculatedPlans.find(p => p.stockKey === stockKey);
+      if (!plan || !plan.steps[stepIdx]) return;
+
+      const targetStep = plan.steps[stepIdx];
+      const { kerf } = state.settings;
+
+      let newCuts = [...targetStep.cuts];
+      let newCount = targetStep.count;
+
+      if (isSplitMode && targetStep.cuts.length > 1) {
+        newCount = targetStep.count * targetStep.cuts.length;
+        newCuts = [targetStep.cuts[0]];
+      }
+
+      const ev = evaluatePatternScore(newSourceType, Number(newBarLength), newCuts, kerf, state.settings);
+      if (!ev) return;
+
+      plan.steps[stepIdx] = {
+        ...ev,
+        key: `${newSourceType}_${newBarLength}_${newCuts.join(',')}_manual_${Date.now()}`,
+        count: newCount,
+        isManualOverride: true
+      };
+
+      renderCuttingPlans(currentCalculatedPlans);
+
+      const pMeta = getProfileMeta(plan.profileId);
+      showToast(
+        state.lang === 'ko'
+          ? `👷 [${pMeta.name}] 프로파일을 [${newSourceType === 'OFFCUT' ? '오프컷' : '원장'} ${Number(newBarLength).toLocaleString()}mm]로 변경했습니다!`
+          : `👷 Changed [${pMeta.name}] to [${newSourceType === 'OFFCUT' ? 'Offcut' : 'Stock'} ${Number(newBarLength).toLocaleString()}mm]!`
+      );
+    }
+
+    function markBarOutOfStockAndRecalculate(stockKey, sourceType, barLength) {
+      const key = `${stockKey}_${sourceType}_${barLength}`;
+      excludedStocks[key] = true;
+      generateCuttingGuide(state.guideMode);
+      updateExclusionResetButton();
+    }
+
+    function clearExcludedStocks() {
+      excludedStocks = {};
+      updateExclusionResetButton();
+      generateCuttingGuide(state.guideMode);
+    }
+
+    function updateExclusionResetButton() {
+      const btn = document.getElementById('btnResetExclusions');
+      const count = Object.keys(excludedStocks).length;
+      const dict = t();
+      if (count > 0) {
+        btn.classList.remove('hidden');
+        btn.textContent = dict.btnResetExclusions(count);
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+
     /*************************************************************************
-     * 4. 전체 UI 렌더링
+     * 4. UI 렌더링
      *************************************************************************/
+    function toggleLanguage() {
+      state.lang = state.lang === 'ko' ? 'en' : 'ko';
+      saveState();
+      renderAll();
+      if (state.currentStep === 2) {
+        generateCuttingGuide(state.guideMode);
+      }
+    }
+
+    function goToStep(stepNum) {
+      state.currentStep = stepNum;
+      saveState();
+      renderStepperAndViews();
+      if (stepNum === 2) {
+        generateCuttingGuide(state.guideMode);
+      } else if (stepNum === 3) {
+        renderInventoryTables();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startGuideFromStep1(mode) {
+      state.guideMode = mode;
+      const count = mode === 'SINGLE'
+        ? getTotalOrderPiecesForColor(state.selectedColor)
+        : getTotalOrderPiecesAllColors();
+
+      if (count === 0) {
+        showToast(state.lang === 'ko'
+          ? '먼저 대기 목록에 프로파일을 1개 이상 담아주세요!'
+          : 'Please add at least one profile to the cutting queue first!');
+        return;
+      }
+      goToStep(2);
+    }
+
+    function renderStepperAndViews() {
+      const step = state.currentStep || 1;
+      [1, 2, 3].forEach(n => {
+        const view = document.getElementById(`stepView${n}`);
+        if (view) {
+          if (n === step) view.classList.remove('hidden');
+          else view.classList.add('hidden');
+        }
+      });
+
+      [1, 2].forEach(n => {
+        const btn = document.getElementById(`stepBtn${n}`);
+        const numBox = document.getElementById(`stepNum${n}`);
+        if (!btn || !numBox) return;
+
+        if (n === step) {
+          btn.className = 'p-4 rounded-2xl border-2 border-cyan-400 bg-indigo-950/50 text-white transition flex items-center gap-3.5 shadow-lg shadow-cyan-500/10';
+          numBox.className = 'w-10 h-10 rounded-xl bg-cyan-400 text-slate-950 flex items-center justify-center font-extrabold text-lg shrink-0';
+        } else {
+          btn.className = 'p-4 rounded-2xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center gap-3.5';
+          numBox.className = 'w-10 h-10 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-extrabold text-lg shrink-0';
+        }
+      });
+
+      // 상단 헤더의 [재고 관리 (표)] 버튼 활성화 스타일 표시
+      const invBtn = document.getElementById('headerBtnInventory');
+      if (invBtn) {
+        if (step === 3) {
+          invBtn.className = 'px-4 py-2.5 rounded-xl bg-emerald-400 text-slate-950 border-2 border-emerald-300 text-sm font-extrabold flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition';
+        } else {
+          invBtn.className = 'px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-sm font-extrabold flex items-center gap-1.5 transition';
+        }
+      }
+    }
+
     function renderAll() {
       const dict = t();
       const { kerf, scrapMax, usableMin } = state.settings;
       const currMeta = getColorMeta(state.selectedColor);
 
-      // Header & Navigation Texts
       document.getElementById('headerTitle').textContent = dict.headerTitle;
       document.getElementById('headerSubtitle').textContent = dict.headerSubtitle(kerf, scrapMax, usableMin);
       document.getElementById('langToggleText').textContent = dict.langToggleText;
@@ -1098,45 +1569,64 @@
       document.getElementById('stepDesc1').textContent = dict.stepDesc1;
       document.getElementById('stepTitle2').textContent = dict.stepTitle2;
       document.getElementById('stepDesc2').textContent = dict.stepDesc2;
-      document.getElementById('stepTitle3').textContent = dict.stepTitle3;
-      document.getElementById('stepDesc3').textContent = dict.stepDesc3;
+      const headerInvText = document.getElementById('btnHeaderInventoryText');
+      if (headerInvText) {
+        headerInvText.textContent = state.lang === 'ko' ? '재고 관리 (표)' : 'Inventory (Table)';
+      }
 
-      // Step 1 Static Texts
-      document.getElementById('s1SelectColorTitle').textContent = dict.s1SelectColorTitle;
-      document.getElementById('s1SelectColorHint').textContent = dict.s1SelectColorHint;
-      document.getElementById('s1InputLengthTitle').textContent = dict.s1InputLengthTitle(currMeta.name);
+      document.getElementById('s1ProductSectionTitle').textContent = dict.s1ProductSectionTitle;
+      document.getElementById('s1LabelProductType').textContent = dict.s1LabelProductType;
+      document.getElementById('s1LabelColorSelect').textContent = dict.s1LabelColorSelect;
+      const activeSampleProfile = getProductMeta(state.selectedProduct).recipes[0]?.profileId || 'HOOD';
+      const activeStdLens = getStandardLengthsForProfileAndColor(activeSampleProfile, state.selectedColor);
       document.getElementById('s1StdLengthInfo').textContent = dict.s1StdLengthInfo(
-        currMeta.standardLengths.map(l => l.toLocaleString()).join(' / ')
+        (activeStdLens.length > 0 ? activeStdLens : currMeta.standardLengths).map(l => l.toLocaleString()).join(' / ')
       );
-      document.getElementById('labelCutLength').textContent = dict.labelCutLength;
-      document.getElementById('labelCutQty').textContent = dict.labelCutQty;
-      document.getElementById('btnAddItemText').textContent = dict.btnAddItemText;
-      document.getElementById('labelQuickAdd').textContent = dict.labelQuickAdd;
+      document.getElementById('s1LabelWidthInput').textContent = dict.s1LabelWidthInput;
+      document.getElementById('s1LabelSetQty').textContent = dict.s1LabelSetQty;
+      document.getElementById('btnAddProductSetText').textContent = dict.btnAddProductSetText;
+      document.getElementById('s1AutoPreviewTitle').textContent = dict.s1AutoPreviewTitle;
+      document.getElementById('s1AutoPreviewHint').textContent = dict.s1AutoPreviewHint;
+      document.getElementById('thAutoUse').textContent = dict.thAutoUse;
+      document.getElementById('thAutoProfile').textContent = dict.thAutoProfile;
+      document.getElementById('thAutoFormula').textContent = dict.thAutoFormula;
+      document.getElementById('thAutoCutSize').textContent = dict.thAutoCutSize;
+      document.getElementById('thAutoQty').textContent = dict.thAutoQty;
+
       document.getElementById('btnClearCurrentColor').textContent = dict.btnClearCurrentColor;
       document.getElementById('btnClearAllColors').textContent = dict.btnClearAllColors;
       document.getElementById('btnCalcSingleColor').textContent = dict.btnCalcSingleColor;
       document.getElementById('btnCalcAllColors').textContent = dict.btnCalcAllColors;
 
-      // Step 2 Static Texts
       document.getElementById('btnBackToStep1').textContent = dict.btnBackToStep1;
       document.getElementById('btnPrintGuide').textContent = dict.btnPrintGuide;
+      document.getElementById('managerHintText').textContent = dict.managerHintText;
+      updateExclusionResetButton();
 
-      // Step 3 Static Texts
-      document.getElementById('s3OverviewTitle').textContent = dict.s3OverviewTitle;
-      document.getElementById('s3OverviewHint').textContent = dict.s3OverviewHint;
-      document.getElementById('s3SelectedColorStockTitle').textContent = dict.s3SelectedColorStockTitle(currMeta.name);
-      document.getElementById('tabBtnOffcut').textContent = dict.tabOffcut;
-      document.getElementById('tabBtnRaw').textContent = dict.tabRaw;
-      document.getElementById('s3ManualAddTitle').textContent = dict.s3ManualAddTitle(currMeta.name);
-      document.getElementById('s3LabelOffcutLen').textContent = dict.s3LabelOffcutLen;
-      document.getElementById('s3LabelOffcutQty').textContent = dict.s3LabelOffcutQty;
+      document.getElementById('s3TableTitle').textContent = dict.s3TableTitle;
+      document.getElementById('s3TableSubtitle').textContent = dict.s3TableSubtitle;
+      document.getElementById('s3ProfileTabLabel').textContent = dict.s3ProfileTabLabel;
+      document.getElementById('thColor').textContent = dict.thColor;
+      document.getElementById('thRaw4700').textContent = dict.thRaw4700;
+      document.getElementById('thRaw5700').textContent = dict.thRaw5700;
+      if (document.getElementById('thRaw5800')) document.getElementById('thRaw5800').textContent = dict.thRaw5800;
+      document.getElementById('thRaw6700').textContent = dict.thRaw6700;
+      document.getElementById('thRaw11000').textContent = dict.thRaw11000;
+      document.getElementById('thOffcutList').textContent = dict.thOffcutList;
+      document.getElementById('s3OffcutDetailTableTitle').textContent = dict.s3OffcutDetailTableTitle;
+      document.getElementById('s3OffcutDetailTableDesc').textContent = dict.s3OffcutDetailTableDesc;
+      document.getElementById('thOcProfile').textContent = dict.thOcProfile;
+      document.getElementById('thOcColor').textContent = dict.thOcColor;
+      document.getElementById('thOcLength').textContent = dict.thOcLength;
+      document.getElementById('thOcStatus').textContent = dict.thOcStatus;
+      document.getElementById('thOcQty').textContent = dict.thOcQty;
+      document.getElementById('thOcAction').textContent = dict.thOcAction;
       document.getElementById('s3BtnAddOffcut').textContent = dict.s3BtnAddOffcut;
       document.getElementById('s3RawLimitTitle').textContent = dict.s3RawLimitTitle;
       document.getElementById('s3RawLimitDesc').textContent = dict.s3RawLimitDesc;
       document.getElementById('s3HistoryTitle').textContent = dict.s3HistoryTitle;
       document.getElementById('s3BtnClearHistory').textContent = dict.s3BtnClearHistory;
 
-      // Modal Texts
       document.getElementById('modalSettingsTitle').textContent = dict.modalSettingsTitle;
       document.getElementById('modalLabelKerf').textContent = dict.modalLabelKerf;
       document.getElementById('modalLabelScrap').textContent = dict.modalLabelScrap;
@@ -1145,47 +1635,140 @@
       document.getElementById('modalBtnCancel').textContent = dict.modalBtnCancel;
       document.getElementById('modalBtnSave').textContent = dict.modalBtnSave;
 
+      const widthEl = document.getElementById('productWidthInput');
+      const qtyEl = document.getElementById('productSetQtyInput');
+      if (widthEl && !widthEl.value) widthEl.value = state.inputWidth || 3500;
+      if (qtyEl && !qtyEl.value) qtyEl.value = state.inputSetQty || 1;
+      if (previewRowsState.length === 0) {
+        initPreviewRowsForProduct(state.selectedProduct, state.inputWidth || 3500, state.inputSetQty || 1);
+      }
+
       renderStepperAndViews();
+      renderProductSelector();
       renderColorSelector();
+      renderAutoProfilePreviewTable();
       renderOrderItems();
-      renderStockSection();
-      renderAllColorOffcutOverview();
+      renderInventoryTables();
       renderHistoryLog();
+    }
+
+    function renderProductSelector() {
+      const grid = document.getElementById('productTypeGrid');
+      grid.innerHTML = PRODUCT_TYPES.map(p => {
+        const isSelected = p.id === state.selectedProduct;
+        const desc = state.lang === 'ko' ? p.descKo : p.descEn;
+        return `
+          <button onclick="selectProductType('${p.id}')"
+            class="p-4 rounded-2xl border-2 text-left transition flex flex-col justify-between min-h-[100px] ${
+              isSelected
+                ? 'bg-indigo-950/80 border-cyan-400 shadow-lg shadow-cyan-500/15'
+                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/60'
+            }">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-base font-extrabold text-white">${p.name}</span>
+              ${isSelected ? `<span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>` : ''}
+            </div>
+            <div class="text-xs text-slate-400 leading-relaxed">${desc}</div>
+          </button>
+        `;
+      }).join('');
     }
 
     function renderColorSelector() {
       const dict = t();
       const grid = document.getElementById('colorSelectorGrid');
+      const prodMeta = getProductMeta(state.selectedProduct);
+      const isMillenniumProd = prodMeta.id === 'MILLENNIUM';
+
       grid.innerHTML = PROFILE_COLORS.map(c => {
+        const isAllowedForProduct = !prodMeta.onlyColors || prodMeta.onlyColors.includes(c.id);
         const isSelected = c.id === state.selectedColor;
-        const offcutCount = (state.offcuts[c.id] || []).reduce((acc, item) => acc + Number(item.qty), 0);
+        const offcutCount = getTotalOffcutsForColor(c.id);
         const orderPiecesCount = getTotalOrderPiecesForColor(c.id);
+        const displayStdLens = (isMillenniumProd && c.id === 'MILL FINISH')
+          ? [5800]
+          : c.standardLengths;
+
+        if (!isAllowedForProduct) {
+          return `
+            <button disabled
+              class="p-3.5 rounded-2xl border border-slate-800/60 bg-slate-950/30 text-left opacity-35 cursor-not-allowed flex flex-col justify-between min-h-[96px]">
+              <div class="flex items-center justify-between w-full mb-2 gap-1">
+                <span class="w-3.5 h-3.5 rounded-full shrink-0 ${c.dotClass}"></span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 font-bold">N/A</span>
+              </div>
+              <div>
+                <div class="text-sm font-extrabold text-slate-500 truncate">${c.name}</div>
+                <div class="text-[10px] text-slate-600 mt-0.5">Millennium 미지원</div>
+              </div>
+            </button>
+          `;
+        }
 
         return `
           <button onclick="selectColor('${c.id}')"
-            class="p-4 rounded-2xl border-2 text-left transition flex flex-col justify-between min-h-[112px] ${
+            class="p-3.5 rounded-2xl border-2 text-left transition flex flex-col justify-between min-h-[96px] ${
               isSelected
                 ? 'bg-indigo-950/70 border-cyan-400 shadow-lg shadow-cyan-500/15'
                 : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/60'
             }">
             <div class="flex items-center justify-between w-full mb-2 gap-1">
-              <span class="w-4 h-4 rounded-full shrink-0 ${c.dotClass}"></span>
+              <span class="w-3.5 h-3.5 rounded-full shrink-0 ${c.dotClass}"></span>
               <div class="flex items-center gap-1 flex-wrap justify-end">
                 ${
                   orderPiecesCount > 0
-                    ? `<span class="text-xs px-2 py-0.5 rounded-lg bg-cyan-400 text-slate-950 font-extrabold">${dict.badgeWaitCuts(orderPiecesCount)}</span>`
+                    ? `<span class="text-[11px] px-2 py-0.5 rounded-lg bg-cyan-400 text-slate-950 font-extrabold">${dict.badgeWaitCuts(orderPiecesCount)}</span>`
                     : ''
                 }
-                <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-emerald-300 font-bold">
+                <span class="text-[11px] px-2 py-0.5 rounded-lg bg-slate-800 text-emerald-300 font-bold">
                   ${dict.badgeOffcutCnt(offcutCount)}
                 </span>
               </div>
             </div>
             <div>
-              <div class="text-base font-extrabold text-white truncate">${c.name}</div>
-              <div class="text-xs text-slate-400 mt-0.5">${c.standardLengths.map(l => l.toLocaleString()).join(' / ')}mm</div>
+              <div class="text-sm font-extrabold text-white truncate">${c.name}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${displayStdLens.map(l => l.toLocaleString()).join(' / ')}mm</div>
             </div>
           </button>
+        `;
+      }).join('');
+    }
+
+    function renderAutoProfilePreviewTable() {
+      const tbody = document.getElementById('autoProfilePreviewTbody');
+      const w = Number(state.inputWidth) || 0;
+
+      tbody.innerHTML = previewRowsState.map((row, idx) => {
+        const pMeta = getProfileMeta(row.profileId);
+        return `
+          <tr class="${row.checked ? 'bg-slate-900/40' : 'opacity-45'} hover:bg-slate-900/80 transition">
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" ${row.checked ? 'checked' : ''}
+                onchange="togglePreviewRowCheck(${idx}, this.checked)"
+                class="w-5 h-5 accent-cyan-400 cursor-pointer" />
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="px-3 py-1 rounded-xl border text-xs font-extrabold ${pMeta.badgeClass}">
+                ${pMeta.name}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 font-mono text-xs sm:text-sm text-slate-300">
+              Width (${w.toLocaleString()}) - <strong class="text-amber-300">${row.deduction}mm</strong>
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-2">
+                <input type="number" value="${row.cutLength}" min="50" max="11000"
+                  onchange="changePreviewRowCutLength(${idx}, this.value)"
+                  class="w-32 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-cyan-300 font-extrabold text-base focus:outline-none focus:border-cyan-400" />
+                <span class="text-xs text-slate-400 font-bold">mm</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <input type="number" value="${row.qty}" min="1" max="500"
+                onchange="changePreviewRowQty(${idx}, this.value)"
+                class="w-20 px-2.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white font-extrabold text-base text-center focus:outline-none focus:border-cyan-400" />
+            </td>
+          </tr>
         `;
       }).join('');
     }
@@ -1205,36 +1788,40 @@
 
       if (currentList.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-8 text-base text-slate-400 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
+          <div class="text-center py-8 px-4 text-sm sm:text-base text-slate-400 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
             ${dict.emptyColorOrder(currentMeta.name)}
           </div>
         `;
       } else {
-        container.innerHTML = currentList.map((item, idx) => `
-          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-3.5">
-            <div class="flex items-center gap-3.5">
-              <span class="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-extrabold flex items-center justify-center">
-                ${idx + 1}
-              </span>
-              <span class="text-xs px-2.5 py-1 rounded-lg font-extrabold ${currentMeta.badgeClass}">${currentMeta.name}</span>
-              <span class="text-xl font-extrabold text-white">${Number(item.length).toLocaleString()} mm</span>
-              ${
-                item.length < state.settings.usableMin
-                  ? `<span class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold">${dict.belowMinWidth(state.settings.usableMin)}</span>`
-                  : ''
-              }
+        container.innerHTML = currentList.map((item, idx) => {
+          const pMeta = getProfileMeta(item.profileId || 'HOOD');
+          return `
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-3.5">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-extrabold flex items-center justify-center">
+                  ${idx + 1}
+                </span>
+                <span class="text-xs px-2.5 py-1 rounded-lg font-extrabold ${currentMeta.badgeClass}">${currentMeta.name}</span>
+                <span class="text-xs px-3 py-1 rounded-lg border font-extrabold ${pMeta.badgeClass}">${pMeta.name}</span>
+                <span class="text-xl font-extrabold text-white">${Number(item.length).toLocaleString()} mm</span>
+                ${
+                  item.productName
+                    ? `<span class="text-xs text-slate-400">(${item.productName}${item.baseWidth ? ` · W:${item.baseWidth.toLocaleString()}` : ''})</span>`
+                    : ''
+                }
+              </div>
+              <div class="flex items-center gap-3">
+                <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', -1)"
+                  class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">-</button>
+                <span class="text-base font-extrabold text-cyan-300 w-14 text-center">${item.qty} ${dict.unitPcs}</span>
+                <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', 1)"
+                  class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">+</button>
+                <button onclick="removeOrderItem('${state.selectedColor}', '${item.id}')"
+                  class="ml-2 text-slate-500 hover:text-rose-400 text-xl font-extrabold px-2">&times;</button>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', -1)"
-                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">-</button>
-              <span class="text-base font-extrabold text-cyan-300 w-14 text-center">${item.qty} ${dict.unitPcs}</span>
-              <button onclick="changeOrderItemQty('${state.selectedColor}', '${item.id}', 1)"
-                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold transition">+</button>
-              <button onclick="removeOrderItem('${state.selectedColor}', '${item.id}')"
-                class="ml-2 text-slate-500 hover:text-rose-400 text-xl font-extrabold px-2">&times;</button>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       }
 
       const otherSummaryEl = document.getElementById('otherColorsOrderSummary');
@@ -1251,14 +1838,13 @@
           <div class="text-xs font-bold text-slate-400 mb-2">${dict.otherColorsSummaryLabel}</div>
           <div class="flex flex-wrap gap-2">
             ${otherColorsWithOrders.map(c => {
-              const items = getColorOrders(c.id);
-              const detailText = items.map(i => `${i.length}mm×${i.qty}`).join(', ');
+              const cnt = getTotalOrderPiecesForColor(c.id);
               return `
                 <button onclick="selectColor('${c.id}')"
                   class="text-sm px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-200 flex items-center gap-2 transition">
                   <span class="w-3 h-3 rounded-full ${c.dotClass}"></span>
                   <strong class="text-cyan-300">${c.name}</strong>
-                  <span class="text-slate-400">(${detailText})</span>
+                  <span class="text-slate-400">(${cnt} ${dict.unitPcs})</span>
                 </button>
               `;
             }).join('')}
@@ -1267,10 +1853,42 @@
       }
     }
 
+    function generateCuttingGuide(mode) {
+      if (mode) state.guideMode = mode;
+      const targetMode = state.guideMode || 'ALL';
+
+      let targetColorIds = [];
+      if (targetMode === 'SINGLE') {
+        if (getTotalOrderPiecesForColor(state.selectedColor) > 0) {
+          targetColorIds = [state.selectedColor];
+        }
+      } else {
+        const orderedColors = [
+          state.selectedColor,
+          ...PROFILE_COLORS.map(c => c.id).filter(id => id !== state.selectedColor)
+        ];
+        targetColorIds = orderedColors.filter(cid => getTotalOrderPiecesForColor(cid) > 0);
+      }
+
+      const plans = [];
+      targetColorIds.forEach(cid => {
+        const colorOrders = getColorOrders(cid);
+        // 프로파일 종류별로 분리하여 각각 독립된 원장/오프컷으로 계산 (Hood는 Hood끼리, Tray는 Tray끼리!)
+        PROFILE_TYPES.forEach(pType => {
+          const itemsForProfile = colorOrders.filter(item => (item.profileId || 'HOOD') === pType.id);
+          if (itemsForProfile.length > 0) {
+            plans.push(solveCuttingPlanForProfileAndColor(pType.id, cid, itemsForProfile, state));
+          }
+        });
+      });
+
+      currentCalculatedPlans = plans;
+      renderCuttingPlans(plans);
+    }
+
     function renderCuttingPlans(plans) {
       const dict = t();
       const kpiContainer = document.getElementById('guideSummaryKPIs');
-      const compBox = document.getElementById('singleComparisonBox');
       const planContainer = document.getElementById('cuttingPlanContainer');
       const applyBtnArea = document.getElementById('applyActionArea');
       const applyBtnLabel = document.getElementById('applyPlanBtnLabel');
@@ -1279,7 +1897,6 @@
 
       if (activePlans.length === 0) {
         kpiContainer.innerHTML = '';
-        compBox.classList.add('hidden');
         applyBtnArea.classList.add('hidden');
         planContainer.innerHTML = `
           <div class="text-center py-16 bg-slate-900/60 border border-dashed border-slate-700 rounded-3xl">
@@ -1324,71 +1941,26 @@
         </div>
       `;
 
-      const currentColorPlan = activePlans.find(p => p.colorId === state.selectedColor) || activePlans[0];
-      if (currentColorPlan && currentColorPlan.singleComparisons && currentColorPlan.singleComparisons.options.length > 1) {
-        const targetLen = currentColorPlan.singleComparisons.targetLength;
-        const chosenStep = currentColorPlan.steps[0];
-        compBox.classList.remove('hidden');
-        compBox.innerHTML = `
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div class="text-base font-extrabold text-cyan-300">
-              ${dict.compTitle(currentColorPlan.colorId, targetLen)}
-            </div>
-            <span class="text-xs text-slate-400">${dict.compKerfNote(state.settings.kerf)}</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            ${currentColorPlan.singleComparisons.options.map(opt => {
-              const isSelected = chosenStep && chosenStep.barSourceType === opt.barSourceType && chosenStep.barLength === opt.barLength && chosenStep.cuts.length === 1;
-              let badgeColor = 'bg-slate-800 text-slate-300';
-              if (opt.status === 'USABLE_OFFCUT' || opt.status === 'PERFECT') badgeColor = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-              else if (opt.status === 'AWKWARD_OFFCUT') badgeColor = 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
-              else if (opt.status === 'SCRAP') badgeColor = 'bg-rose-500/20 text-rose-300 border border-rose-500/30';
-
-              return `
-                <div class="p-4 rounded-2xl border-2 text-sm ${
-                  isSelected
-                    ? 'bg-indigo-950/70 border-cyan-400 shadow-md'
-                    : 'bg-slate-950/60 border-slate-800 opacity-75'
-                }">
-                  <div class="flex items-center justify-between mb-1.5">
-                    <span class="font-extrabold text-base text-white">
-                      ${opt.barSourceType === 'OFFCUT' ? dict.sourceShortOffcut : dict.sourceShortRaw}${opt.barLength.toLocaleString()}mm
-                    </span>
-                    ${isSelected ? `<span class="text-xs px-2 py-0.5 rounded-lg bg-cyan-400 text-slate-950 font-extrabold">${dict.compRecommended}</span>` : ''}
-                  </div>
-                  <div class="text-xs text-slate-300 mb-2">
-                    ${dict.compRemainder(opt.remainder, opt.kerfTotal)}
-                  </div>
-                  <div class="text-xs px-2.5 py-1.5 rounded-lg font-semibold ${badgeColor}">
-                    ${opt.reasonTag}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-      } else {
-        compBox.classList.add('hidden');
-      }
-
       planContainer.innerHTML = activePlans.map(plan => {
         const cMeta = getColorMeta(plan.colorId);
+        const pMeta = getProfileMeta(plan.profileId);
         const totalBars = plan.steps.reduce((s, st) => s + st.count, 0);
+        const groupLabel = `${cMeta.name} · ${pMeta.name}`;
+
         let sectionHtml = `
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-              <div class="flex items-center gap-3">
-                <span class="w-5 h-5 rounded-full ${cMeta.dotClass}"></span>
-                <span class="text-xl font-extrabold text-white">
-                  ${state.lang === 'ko' ? dict.guideSectionTitle(cMeta.name, cMeta.korName) : dict.guideSectionTitle(cMeta.name)}
-                </span>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="w-4 h-4 rounded-full ${cMeta.dotClass}"></span>
+                <span class="text-sm px-2.5 py-1 rounded-lg font-extrabold ${cMeta.badgeClass}">${cMeta.name}</span>
+                <span class="text-base px-3.5 py-1 rounded-xl border font-extrabold ${pMeta.badgeClass}">${pMeta.name}</span>
                 <span class="text-sm font-bold text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
                   ${dict.guideTotalBars(totalBars)}
                 </span>
               </div>
-              <button onclick="applySingleColorPlan('${plan.colorId}')"
+              <button onclick="applySingleGroupPlan('${plan.stockKey}')"
                 class="no-print px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-sm font-extrabold transition">
-                ${dict.btnApplyThisColorOnly(cMeta.name)}
+                ${dict.btnApplyThisGroupOnly(groupLabel)}
               </button>
             </div>
         `;
@@ -1402,7 +1974,7 @@
           `;
         }
 
-        sectionHtml += plan.steps.map(step => {
+        sectionHtml += plan.steps.map((step, stepIdx) => {
           const isOffcutSource = step.barSourceType === 'OFFCUT';
           const totalLen = step.barLength;
 
@@ -1412,7 +1984,7 @@
             segmentsHtml += `
               <div style="width: ${widthPct}%" class="bar-segment h-14 bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-extrabold text-sm flex flex-col items-center justify-center border-r border-slate-900 overflow-hidden px-1">
                 <span class="text-base">${cLen.toLocaleString()}mm</span>
-                <span class="text-[11px] font-bold opacity-80">CUT #${cIdx + 1}</span>
+                <span class="text-[11px] font-bold opacity-80">${pMeta.name} #${cIdx + 1}</span>
               </div>
             `;
             if (cIdx < step.kerfCount) {
@@ -1454,21 +2026,26 @@
             outcomeBadge = `<span class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-sm font-extrabold">${dict.outAwkward(step.remainder, state.settings.usableMin)}</span>`;
           }
 
+          const altOptions = getAlternativeBarOptionsForStep(plan.stockKey, plan.profileId, plan.colorId, step);
+
           return `
-            <div class="bg-slate-950/90 border-2 ${isOffcutSource ? 'border-emerald-500/70' : 'border-slate-800'} rounded-2xl p-5 shadow-lg">
+            <div class="bg-slate-950/90 border-2 ${step.isManualOverride ? 'border-amber-400/80' : (isOffcutSource ? 'border-emerald-500/70' : 'border-slate-800')} rounded-2xl p-5 shadow-lg">
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
                   <span class="px-3 py-1.5 rounded-xl text-sm font-extrabold ${
-                    isOffcutSource
-                      ? 'bg-emerald-400 text-slate-950'
-                      : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    step.isManualOverride
+                      ? 'bg-amber-400 text-slate-950'
+                      : (isOffcutSource
+                          ? 'bg-emerald-400 text-slate-950'
+                          : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30')
                   }">
-                    ${isOffcutSource ? dict.sourceOffcut : dict.sourceRaw}
+                    ${step.isManualOverride ? dict.sourceManualOverride : (isOffcutSource ? dict.sourceOffcut : dict.sourceRaw)}
                   </span>
                   <span class="text-2xl font-extrabold text-white">${step.barLength.toLocaleString()} mm</span>
+                  <span class="text-xs px-2.5 py-1 rounded-lg border font-extrabold ${pMeta.badgeClass}">${pMeta.name}</span>
                   <span class="text-xs px-2.5 py-1 rounded-lg font-extrabold ${cMeta.badgeClass}">${cMeta.name}</span>
                 </div>
-                <div>
+                <div class="flex items-center gap-2">
                   <span class="px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-500/40 text-sm font-extrabold">
                     ${dict.sameWorkCount(step.count)}
                   </span>
@@ -1481,7 +2058,7 @@
               </div>
 
               <!-- Details Row -->
-              <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300 pt-1">
+              <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300 pt-1 pb-4 border-b border-slate-800/80">
                 <div class="space-x-3">
                   <span><strong>${dict.cutDetailsLabel}</strong> ${step.cuts.map(c => `${c.toLocaleString()}mm`).join(' + ')} (${step.cuts.length} ${dict.cutsUnit})</span>
                   <span class="text-slate-600">|</span>
@@ -1490,6 +2067,37 @@
                 <div>
                   ${outcomeBadge}
                 </div>
+              </div>
+
+              <!-- 현장 매니저 프로파일 길이 변경 컨트롤러 (No-Print) -->
+              <div class="mt-4 pt-1 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-extrabold text-amber-300 mr-1">${dict.overrideBarLabel}</span>
+                  ${altOptions.map(alt => {
+                    const isCurrent = alt.barSourceType === step.barSourceType && alt.barLength === step.barLength && !alt.splitMode;
+                    let statusDot = '🟢';
+                    if (alt.status === 'AWKWARD_OFFCUT') statusDot = '🟡';
+                    else if (alt.status === 'SCRAP') statusDot = '🔵';
+
+                    return `
+                      <button onclick="overrideStepBarLength('${plan.stockKey}', ${stepIdx}, '${alt.barSourceType}', ${alt.barLength}, ${alt.splitMode})"
+                        class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 ${
+                          isCurrent
+                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md'
+                            : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700 hover:border-cyan-400'
+                        }">
+                        <span>${alt.barSourceType === 'OFFCUT' ? '♻️' : '📏'} ${alt.barLength.toLocaleString()}mm</span>
+                        <span class="opacity-80 font-semibold">(${statusDot} ${state.lang === 'ko' ? '잔여' : 'Rem'} ${alt.remainder.toLocaleString()}mm)</span>
+                        ${alt.splitMode ? `<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">${dict.altSplitNeededBadge(alt.newCount)}</span>` : ''}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <button onclick="markBarOutOfStockAndRecalculate('${plan.stockKey}', '${step.barSourceType}', ${step.barLength})"
+                  class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+                  ${dict.btnMarkOutOfStock}
+                </button>
               </div>
             </div>
           `;
@@ -1503,115 +2111,235 @@
         applyBtnArea.classList.remove('hidden');
         applyBtnLabel.textContent = activePlans.length > 1
           ? dict.applyAllBtn(activePlans.length)
-          : dict.applySingleBtn(activePlans[0].colorId);
+          : dict.applySingleBtn(`${activePlans[0].colorId} · ${getProfileMeta(activePlans[0].profileId).name}`);
       } else {
         applyBtnArea.classList.add('hidden');
       }
     }
 
-    function renderStockSection() {
+    /**
+     * Step 3: 프로파일 종류 & 색상별 표준 원장 + OFFCUT 통합 표(Table) 렌더링
+     */
+    function selectInventoryProfileTab(profileId) {
+      state.selectedInventoryProfile = profileId;
+      saveState();
+      renderInventoryTables();
+    }
+
+    function renderInventoryTables() {
       const dict = t();
-      const isOffcut = state.stockTab === 'offcut';
-      document.getElementById('stockTabOffcut').classList.toggle('hidden', !isOffcut);
-      document.getElementById('stockTabRaw').classList.toggle('hidden', isOffcut);
+      document.getElementById('useRawStockLimitToggle').checked = !!state.useRawStockLimit;
+      const activeProfileId = state.selectedInventoryProfile || 'HOOD';
 
-      document.getElementById('tabBtnOffcut').className = isOffcut
-        ? 'px-4 py-2 rounded-lg font-extrabold bg-emerald-500 text-slate-950 transition'
-        : 'px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
-      document.getElementById('tabBtnRaw').className = !isOffcut
-        ? 'px-4 py-2 rounded-lg font-extrabold bg-cyan-500 text-slate-950 transition'
-        : 'px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
-
-      const offcutList = state.offcuts[state.selectedColor] || [];
-      const offcutContainer = document.getElementById('offcutListContainer');
-
-      if (offcutList.length === 0) {
-        offcutContainer.innerHTML = `
-          <div class="text-center py-10 text-base text-slate-400 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
-            ${dict.emptyOffcutStock(state.selectedColor)}
-          </div>
-        `;
-      } else {
-        const sorted = [...offcutList].sort((a, b) => b.length - a.length);
-        offcutContainer.innerHTML = sorted.map(oc => {
-          const isUsable = oc.length >= state.settings.usableMin;
+      // 프로파일 종류 탭 버튼 렌더링
+      const tabsContainer = document.getElementById('inventoryProfileTabs');
+      if (tabsContainer) {
+        tabsContainer.innerHTML = PROFILE_TYPES.map(p => {
+          const isSelected = p.id === activeProfileId;
+          // 해당 프로파일의 전체 색상 오프컷 합계
+          let pOffcutSum = 0;
+          PROFILE_COLORS.forEach(c => {
+            const sk = makeStockKey(p.id, c.id);
+            pOffcutSum += (state.offcuts[sk] || []).reduce((acc, x) => acc + Number(x.qty), 0);
+          });
           return `
-            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-3.5">
-              <div class="flex items-center gap-3">
-                <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${isUsable ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
-                  OFFCUT
-                </span>
-                <span class="text-xl font-extrabold text-white">${Number(oc.length).toLocaleString()} mm</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <button onclick="changeOffcutQty('${oc.id}', -1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">-</button>
-                <span class="text-base font-extrabold text-emerald-300 w-14 text-center">${oc.qty} ${dict.unitPcs}</span>
-                <button onclick="changeOffcutQty('${oc.id}', 1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">+</button>
-                <button onclick="deleteOffcut('${oc.id}')" class="ml-2 text-slate-500 hover:text-rose-400 text-xl font-extrabold px-2">&times;</button>
-              </div>
-            </div>
+            <button onclick="selectInventoryProfileTab('${p.id}')"
+              class="px-4 py-2.5 rounded-xl border-2 text-sm font-extrabold transition flex items-center gap-2 ${
+                isSelected
+                  ? 'bg-indigo-950 border-cyan-400 text-white shadow-md'
+                  : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+              }">
+              <span>${p.name}</span>
+              <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-emerald-300 font-bold">${pOffcutSum}</span>
+            </button>
           `;
         }).join('');
       }
 
-      document.getElementById('useRawStockLimitToggle').checked = !!state.useRawStockLimit;
-      const colorMeta = getColorMeta(state.selectedColor);
-      const rawContainer = document.getElementById('rawStockListContainer');
-      rawContainer.innerHTML = colorMeta.standardLengths.map(len => {
-        const qty = state.rawStocks[state.selectedColor]?.[len] ?? 0;
-        return `
-          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-2xl px-5 py-4">
-            <div>
-              <span class="text-sm font-bold text-cyan-300 mr-3">${dict.rawStdLabel}</span>
-              <span class="text-xl font-extrabold text-white">${len.toLocaleString()} mm</span>
-            </div>
-            ${
-              state.useRawStockLimit
-                ? `<div class="flex items-center gap-3">
-                    <button onclick="changeRawStockQty(${len}, -1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">-</button>
-                    <input type="number" value="${qty}" onchange="setRawStockQty(${len}, this.value)"
-                      class="w-20 text-center bg-slate-800 border border-slate-700 rounded-xl py-1.5 text-base font-extrabold text-white" />
-                    <button onclick="changeRawStockQty(${len}, 1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-lg font-extrabold">+</button>
-                  </div>`
-                : `<span class="text-sm font-extrabold text-emerald-400">${dict.rawUnlimited}</span>`
-            }
-          </div>
-        `;
-      }).join('');
-    }
+      // 하단 빠른 추가 셀렉트박스 동기화
+      const profSelectEl = document.getElementById('quickOffcutProfileSelect');
+      if (profSelectEl) {
+        profSelectEl.innerHTML = PROFILE_TYPES.map(p =>
+          `<option value="${p.id}" ${p.id === activeProfileId ? 'selected' : ''}>${p.name}</option>`
+        ).join('');
+      }
+      const colSelectEl = document.getElementById('quickOffcutColorSelect');
+      if (colSelectEl) {
+        colSelectEl.innerHTML = PROFILE_COLORS.map(c =>
+          `<option value="${c.id}" ${c.id === state.selectedColor ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+      }
 
-    function renderAllColorOffcutOverview() {
-      const dict = t();
-      const container = document.getElementById('allColorOffcutOverview');
-      container.innerHTML = PROFILE_COLORS.map(c => {
-        const list = (state.offcuts[c.id] || []).filter(x => x.qty > 0).sort((a, b) => b.length - a.length);
-        const totalQty = list.reduce((s, x) => s + Number(x.qty), 0);
-        return `
-          <div onclick="selectColor('${c.id}')"
-            class="cursor-pointer bg-slate-950/80 hover:bg-slate-900 border-2 ${state.selectedColor === c.id ? 'border-cyan-400' : 'border-slate-800'} rounded-2xl p-5 transition">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-3.5 h-3.5 rounded-full ${c.dotClass}"></span>
-                <span class="text-base font-extrabold text-white">${c.name}</span>
+      // 1) 선택된 프로파일 종류의 색상별 마스터 테이블
+      const masterTbody = document.getElementById('inventoryMasterTableBody');
+      const activeProfileMeta = getProfileMeta(activeProfileId);
+      const allStdLengths = [4700, 5700, 5800, 6700, 11000];
+
+      // 해당 프로파일이 지원하는 색상만 필터링 (예: Millennium 프로파일은 MILL FINISH만 표시)
+      const visibleColors = PROFILE_COLORS.filter(c =>
+        !activeProfileMeta.onlyColors || activeProfileMeta.onlyColors.includes(c.id)
+      );
+
+      masterTbody.innerHTML = visibleColors.map(c => {
+        const sKey = makeStockKey(activeProfileId, c.id);
+        const offcutList = (state.offcuts[sKey] || []).filter(x => x.qty > 0).sort((a, b) => b.length - a.length);
+        const supportedLens = getStandardLengthsForProfileAndColor(activeProfileId, c.id);
+
+        const rawCellsHtml = allStdLengths.map(stdLen => {
+          const isSupported = supportedLens.includes(stdLen);
+          if (!isSupported) {
+            return `<td class="py-3.5 px-3 text-center text-slate-600 font-bold">-</td>`;
+          }
+          const qty = state.rawStocks[sKey]?.[stdLen] ?? 0;
+          if (!state.useRawStockLimit) {
+            return `
+              <td class="py-3.5 px-3 text-center">
+                <span class="inline-block px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-extrabold">
+                  ∞ ${dict.rawUnlimitedShort}
+                </span>
+              </td>
+            `;
+          }
+          return `
+            <td class="py-3.5 px-2 text-center">
+              <div class="inline-flex items-center bg-slate-900 border border-slate-700 rounded-xl p-1">
+                <button onclick="changeRawStockQty('${sKey}', ${stdLen}, -1)"
+                  class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-extrabold">-</button>
+                <input type="number" value="${qty}" min="0"
+                  onchange="setRawStockQty('${sKey}', ${stdLen}, this.value)"
+                  class="w-12 text-center bg-transparent text-white font-extrabold text-sm focus:outline-none" />
+                <button onclick="changeRawStockQty('${sKey}', ${stdLen}, 1)"
+                  class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-extrabold">+</button>
               </div>
-              <span class="text-sm font-extrabold ${totalQty > 0 ? 'text-emerald-400' : 'text-slate-500'}">
-                ${dict.badgeOffcutCnt(totalQty)}
-              </span>
-            </div>
-            ${
-              list.length === 0
-                ? `<div class="text-sm text-slate-500">${dict.noOffcuts}</div>`
-                : `<div class="flex flex-wrap gap-1.5">
-                    ${list.map(item => `
-                      <span class="text-sm px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200">
-                        <strong class="text-emerald-300">${item.length.toLocaleString()}</strong>mm × ${item.qty}
-                      </span>
-                    `).join('')}
-                  </div>`
-            }
-          </div>
+            </td>
+          `;
+        }).join('');
+
+        const offcutPillsHtml = offcutList.length === 0
+          ? `<span class="text-xs text-slate-500">${dict.noOffcuts}</span>`
+          : offcutList.map(oc => {
+              const isUsable = oc.length >= state.settings.usableMin;
+              return `
+                <div class="inline-flex items-center gap-1.5 bg-slate-900 border ${isUsable ? 'border-emerald-500/40' : 'border-amber-500/40'} rounded-xl px-2.5 py-1">
+                  <span class="font-extrabold text-white text-xs">${Number(oc.length).toLocaleString()}mm</span>
+                  <span class="text-slate-500">×</span>
+                  <button onclick="changeOffcutQtyByKey('${sKey}', '${oc.id}', -1)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">-</button>
+                  <span class="font-extrabold text-emerald-300 text-xs px-0.5">${oc.qty}</span>
+                  <button onclick="changeOffcutQtyByKey('${sKey}', '${oc.id}', 1)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">+</button>
+                  <button onclick="deleteOffcutByKey('${sKey}', '${oc.id}')" class="text-slate-500 hover:text-rose-400 text-xs font-bold ml-0.5">&times;</button>
+                </div>
+              `;
+            }).join('');
+
+        return `
+          <tr class="hover:bg-slate-900/40 transition">
+            <td class="py-4 px-4">
+              <div class="flex items-center gap-2.5">
+                <span class="w-3.5 h-3.5 rounded-full shrink-0 ${c.dotClass}"></span>
+                <div>
+                  <div class="font-extrabold text-white text-sm">${c.name}</div>
+                  <div class="text-[11px] text-slate-400">${getProfileMeta(activeProfileId).name}</div>
+                </div>
+              </div>
+            </td>
+            ${rawCellsHtml}
+            <td class="py-3.5 px-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  ${offcutPillsHtml}
+                </div>
+                <!-- 행 내부 인라인 오프컷 빠른 추가 -->
+                <div class="inline-flex items-center gap-1 bg-slate-900/90 border border-slate-800 rounded-xl p-1 shrink-0">
+                  <input type="number" id="inlineOcLen_${sKey}" placeholder="길이(mm)" min="500" max="11000"
+                    class="w-20 px-2 py-1 rounded-lg bg-slate-800 text-white text-xs font-bold focus:outline-none focus:border-emerald-400"
+                    onkeydown="if(event.key==='Enter') addInlineOffcut('${sKey}')" />
+                  <input type="number" id="inlineOcQty_${sKey}" value="1" min="1" max="99"
+                    class="w-12 px-1.5 py-1 rounded-lg bg-slate-800 text-white text-xs font-bold text-center focus:outline-none"
+                    onkeydown="if(event.key==='Enter') addInlineOffcut('${sKey}')" />
+                  <button onclick="addInlineOffcut('${sKey}')"
+                    class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-extrabold transition">
+                    +
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
         `;
       }).join('');
+
+      // 2) 전체 프로파일 보유 OFFCUT 상세 일람표 렌더링
+      const flatTbody = document.getElementById('offcutFlatTableBody');
+      const allOffcutsFlat = [];
+      PROFILE_TYPES.forEach(p => {
+        PROFILE_COLORS.forEach(c => {
+          const sKey = makeStockKey(p.id, c.id);
+          const list = (state.offcuts[sKey] || []).filter(x => x.qty > 0).sort((a, b) => b.length - a.length);
+          list.forEach(oc => {
+            allOffcutsFlat.push({
+              stockKey: sKey,
+              profileMeta: p,
+              colorMeta: c,
+              ...oc
+            });
+          });
+        });
+      });
+
+      if (allOffcutsFlat.length === 0) {
+        flatTbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 px-4 text-center text-slate-400">
+              ${dict.emptyOffcutTable}
+            </td>
+          </tr>
+        `;
+      } else {
+        flatTbody.innerHTML = allOffcutsFlat.map(item => {
+          const isUsable = item.length >= state.settings.usableMin;
+          return `
+            <tr class="hover:bg-slate-900/40 transition">
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-1 rounded-lg border text-xs font-extrabold ${item.profileMeta.badgeClass}">
+                  ${item.profileMeta.name}
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full ${item.colorMeta.dotClass}"></span>
+                  <span class="font-extrabold text-white">${item.colorMeta.name}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4 font-extrabold text-base text-white">
+                ${Number(item.length).toLocaleString()} mm
+              </td>
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${
+                  isUsable
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                }">
+                  ${isUsable ? dict.ocGradeGood(state.settings.usableMin) : dict.ocGradeShort(state.settings.usableMin)}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1">
+                  <button onclick="changeOffcutQtyByKey('${item.stockKey}', '${item.id}', -1)"
+                    class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs">-</button>
+                  <span class="w-10 text-center font-extrabold text-emerald-300">${item.qty}</span>
+                  <button onclick="changeOffcutQtyByKey('${item.stockKey}', '${item.id}', 1)"
+                    class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs">+</button>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="deleteOffcutByKey('${item.stockKey}', '${item.id}')"
+                  class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 text-xs font-bold transition">
+                  &times;
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
     function renderHistoryLog() {
@@ -1630,7 +2358,8 @@
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-sm flex flex-wrap items-center justify-between gap-2">
           <div>
             <span class="text-xs text-slate-400 mr-2">${h.timestamp}</span>
-            <span class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-extrabold mr-2">${h.colorId}</span>
+            <span class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-extrabold mr-1.5">${h.colorId}</span>
+            ${h.profileName ? `<span class="px-2 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-extrabold mr-2">${h.profileName}</span>` : ''}
             <span class="text-slate-200 font-semibold">${h.summaryText}</span>
           </div>
           <div class="flex items-center gap-3 text-xs font-bold">
@@ -1652,72 +2381,6 @@
       if (state.currentStep === 2) {
         generateCuttingGuide(state.guideMode);
       }
-    }
-
-    function switchStockTab(tab) {
-      state.stockTab = tab;
-      saveState();
-      renderStockSection();
-    }
-
-    function addCutOrderItem() {
-      const lenInput = document.getElementById('cutLengthInput');
-      const qtyInput = document.getElementById('cutQtyInput');
-      const length = parseInt(lenInput.value, 10);
-      const qty = parseInt(qtyInput.value, 10) || 1;
-
-      if (!length || length <= 0) {
-        showToast(state.lang === 'ko' ? '올바른 커팅 길이(mm)를 입력해 주세요.' : 'Please enter a valid cut length (mm).');
-        lenInput.focus();
-        return;
-      }
-
-      const colorMeta = getColorMeta(state.selectedColor);
-      const maxStd = Math.max(...colorMeta.standardLengths);
-      if (length > maxStd) {
-        showToast(
-          state.lang === 'ko'
-            ? `현재 색상(${state.selectedColor})의 최대 원장 길이(${maxStd.toLocaleString()}mm)를 초과합니다.`
-            : `Exceeds max standard length (${maxStd.toLocaleString()}mm) for ${state.selectedColor}.`
-        );
-        return;
-      }
-
-      const list = getColorOrders(state.selectedColor);
-      const existing = list.find(x => Number(x.length) === length);
-      if (existing) existing.qty += qty;
-      else {
-        list.push({
-          id: 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          length,
-          qty
-        });
-      }
-
-      lenInput.value = '';
-      qtyInput.value = '1';
-      saveState();
-      renderAll();
-      lenInput.focus();
-    }
-
-    function quickAdd(length, qty) {
-      const colorMeta = getColorMeta(state.selectedColor);
-      const maxStd = Math.max(...colorMeta.standardLengths);
-      if (length > maxStd) return;
-
-      const list = getColorOrders(state.selectedColor);
-      const existing = list.find(x => Number(x.length) === length);
-      if (existing) existing.qty += qty;
-      else {
-        list.push({
-          id: 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          length,
-          qty
-        });
-      }
-      saveState();
-      renderAll();
     }
 
     function changeOrderItemQty(colorId, id, delta) {
@@ -1749,32 +2412,8 @@
       renderAll();
     }
 
-    function generateCuttingGuide(mode) {
-      if (mode) state.guideMode = mode;
-      const targetMode = state.guideMode || 'ALL';
-
-      let targetColorIds = [];
-      if (targetMode === 'SINGLE') {
-        if (getTotalOrderPiecesForColor(state.selectedColor) > 0) {
-          targetColorIds = [state.selectedColor];
-        }
-      } else {
-        const orderedColors = [
-          state.selectedColor,
-          ...PROFILE_COLORS.map(c => c.id).filter(id => id !== state.selectedColor)
-        ];
-        targetColorIds = orderedColors.filter(cid => getTotalOrderPiecesForColor(cid) > 0);
-      }
-
-      const plans = targetColorIds.map(cid =>
-        solveCuttingPlanForColor(cid, getColorOrders(cid), state)
-      );
-      currentCalculatedPlans = plans;
-      renderCuttingPlans(plans);
-    }
-
-    function applySingleColorPlan(colorId) {
-      const targetPlan = currentCalculatedPlans.find(p => p.colorId === colorId);
+    function applySingleGroupPlan(stockKey) {
+      const targetPlan = currentCalculatedPlans.find(p => p.stockKey === stockKey);
       if (!targetPlan || targetPlan.steps.length === 0) return;
       commitPlansToInventory([targetPlan]);
     }
@@ -1790,7 +2429,8 @@
       let totalCreatedOffcut = 0;
 
       plansToCommit.forEach(plan => {
-        const colorId = plan.colorId;
+        const { stockKey, profileId, colorId } = plan;
+        const pMeta = getProfileMeta(profileId);
         let usedOffcutCount = 0;
         let createdOffcutCount = 0;
         let scrapCount = 0;
@@ -1799,21 +2439,21 @@
           for (let i = 0; i < step.count; i++) {
             if (step.barSourceType === 'OFFCUT') {
               usedOffcutCount++;
-              const ocList = state.offcuts[colorId] || [];
+              const ocList = state.offcuts[stockKey] || [];
               const targetOc = ocList.find(o => Number(o.length) === Number(step.barLength) && o.qty > 0);
               if (targetOc) {
                 targetOc.qty -= 1;
                 if (targetOc.qty <= 0) {
-                  state.offcuts[colorId] = ocList.filter(o => o.qty > 0);
+                  state.offcuts[stockKey] = ocList.filter(o => o.qty > 0);
                 }
               }
-            } else if (state.useRawStockLimit && state.rawStocks[colorId]?.[step.barLength] !== undefined) {
-              state.rawStocks[colorId][step.barLength] = Math.max(0, state.rawStocks[colorId][step.barLength] - 1);
+            } else if (state.useRawStockLimit && state.rawStocks[stockKey]?.[step.barLength] !== undefined) {
+              state.rawStocks[stockKey][step.barLength] = Math.max(0, state.rawStocks[stockKey][step.barLength] - 1);
             }
 
             if (step.nextOffcut > state.settings.scrapMax) {
               createdOffcutCount++;
-              addOrIncrementOffcut(colorId, step.nextOffcut, 1);
+              addOrIncrementOffcutByKey(stockKey, step.nextOffcut, 1);
             } else if (step.remainder > 0 && step.remainder <= state.settings.scrapMax) {
               scrapCount++;
             }
@@ -1832,15 +2472,20 @@
             month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
           }),
           colorId,
+          profileName: pMeta.name,
           summaryText: summaryParts.join(', '),
           usedOffcutCount,
           createdOffcutCount,
           scrapCount
         });
 
-        state.ordersByColor[colorId] = [];
+        // 확정된 색상 + 프로파일 종류만 대기 목록에서 제거
+        state.ordersByColor[colorId] = getColorOrders(colorId).filter(item => (item.profileId || 'HOOD') !== profileId);
+        state.selectedInventoryProfile = profileId;
       });
 
+      excludedStocks = {};
+      updateExclusionResetButton();
       saveState();
       renderAll();
       generateCuttingGuide(state.guideMode);
@@ -1851,18 +2496,17 @@
           : `✅ Confirmed! (Used Offcuts: ${totalUsedOffcut} / New Offcuts: +${totalCreatedOffcut})`
       );
 
-      // 모든 대기 커팅이 완료되었으면 3단계(재고 확인 화면)로 자동 전환
       if (getTotalOrderPiecesAllColors() === 0) {
         goToStep(3);
       }
     }
 
-    function addOrIncrementOffcut(colorId, length, qty) {
-      if (!state.offcuts[colorId]) state.offcuts[colorId] = [];
-      const existing = state.offcuts[colorId].find(o => Number(o.length) === Number(length));
+    function addOrIncrementOffcutByKey(stockKey, length, qty) {
+      if (!state.offcuts[stockKey]) state.offcuts[stockKey] = [];
+      const existing = state.offcuts[stockKey].find(o => Number(o.length) === Number(length));
       if (existing) existing.qty += Number(qty);
       else {
-        state.offcuts[colorId].push({
+        state.offcuts[stockKey].push({
           id: 'oc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
           length: Number(length),
           qty: Number(qty)
@@ -1870,7 +2514,35 @@
       }
     }
 
+    function addInlineOffcut(stockKey) {
+      const lenInput = document.getElementById(`inlineOcLen_${stockKey}`);
+      const qtyInput = document.getElementById(`inlineOcQty_${stockKey}`);
+      const length = parseInt(lenInput.value, 10);
+      const qty = parseInt(qtyInput.value, 10) || 1;
+
+      if (!length || length <= state.settings.scrapMax) {
+        showToast(
+          state.lang === 'ko'
+            ? `오프컷은 폐기 기준(${state.settings.scrapMax}mm)보다 긴 길이만 등록할 수 있습니다.`
+            : `Offcut length must be greater than scrap threshold (${state.settings.scrapMax}mm).`
+        );
+        return;
+      }
+
+      addOrIncrementOffcutByKey(stockKey, length, qty);
+      lenInput.value = '';
+      qtyInput.value = '1';
+      saveState();
+      renderAll();
+    }
+
     function addManualOffcut() {
+      const profSelect = document.getElementById('quickOffcutProfileSelect');
+      const colSelect = document.getElementById('quickOffcutColorSelect');
+      const targetProfile = profSelect ? profSelect.value : (state.selectedInventoryProfile || 'HOOD');
+      const targetColor = colSelect ? colSelect.value : state.selectedColor;
+      const sKey = makeStockKey(targetProfile, targetColor);
+
       const lenEl = document.getElementById('manualOffcutLen');
       const qtyEl = document.getElementById('manualOffcutQty');
       const length = parseInt(lenEl.value, 10);
@@ -1885,27 +2557,27 @@
         return;
       }
 
-      addOrIncrementOffcut(state.selectedColor, length, qty);
+      addOrIncrementOffcutByKey(sKey, length, qty);
       lenEl.value = '';
       qtyEl.value = '1';
       saveState();
       renderAll();
     }
 
-    function changeOffcutQty(id, delta) {
-      const list = state.offcuts[state.selectedColor] || [];
+    function changeOffcutQtyByKey(stockKey, id, delta) {
+      const list = state.offcuts[stockKey] || [];
       const item = list.find(x => x.id === id);
       if (!item) return;
       item.qty += delta;
       if (item.qty <= 0) {
-        state.offcuts[state.selectedColor] = list.filter(x => x.id !== id);
+        state.offcuts[stockKey] = list.filter(x => x.id !== id);
       }
       saveState();
       renderAll();
     }
 
-    function deleteOffcut(id) {
-      state.offcuts[state.selectedColor] = (state.offcuts[state.selectedColor] || []).filter(x => x.id !== id);
+    function deleteOffcutByKey(stockKey, id) {
+      state.offcuts[stockKey] = (state.offcuts[stockKey] || []).filter(x => x.id !== id);
       saveState();
       renderAll();
     }
@@ -1913,20 +2585,22 @@
     function toggleRawStockLimit() {
       state.useRawStockLimit = document.getElementById('useRawStockLimitToggle').checked;
       saveState();
-      renderStockSection();
+      renderInventoryTables();
     }
 
-    function changeRawStockQty(len, delta) {
-      const curr = state.rawStocks[state.selectedColor]?.[len] ?? 0;
-      state.rawStocks[state.selectedColor][len] = Math.max(0, curr + delta);
+    function changeRawStockQty(stockKey, len, delta) {
+      if (!state.rawStocks[stockKey]) state.rawStocks[stockKey] = {};
+      const curr = state.rawStocks[stockKey][len] ?? 0;
+      state.rawStocks[stockKey][len] = Math.max(0, curr + delta);
       saveState();
-      renderStockSection();
+      renderInventoryTables();
     }
 
-    function setRawStockQty(len, val) {
-      state.rawStocks[state.selectedColor][len] = Math.max(0, parseInt(val, 10) || 0);
+    function setRawStockQty(stockKey, len, val) {
+      if (!state.rawStocks[stockKey]) state.rawStocks[stockKey] = {};
+      state.rawStocks[stockKey][len] = Math.max(0, parseInt(val, 10) || 0);
       saveState();
-      renderStockSection();
+      renderInventoryTables();
     }
 
     function clearHistory() {
@@ -1953,7 +2627,7 @@
     function saveSettings() {
       const kerf = Math.max(0, parseInt(document.getElementById('settingKerf').value, 10) || 5);
       const scrapMax = Math.max(0, parseInt(document.getElementById('settingScrapMax').value, 10) || 1000);
-      const usableMin = Math.max(scrapMax + 100, parseInt(document.getElementById('settingUsableMin').value, 10) || 2000);
+      const usableMin = Math.max(scrapMax + 100, parseInt(document.getElementById('settingUsableMin').value, 10) || 3000);
 
       state.settings = { kerf, scrapMax, usableMin };
       saveState();
@@ -1965,9 +2639,9 @@
     function resetAllData() {
       if (!confirm(state.lang === 'ko' ? '모든 데이터를 초기화하시겠습니까?' : 'Reset all inventory and queue data?')) return;
       localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem('OFFCUT_MANAGER_STATE_V2');
-      localStorage.removeItem('OFFCUT_MANAGER_STATE_V1');
+      excludedStocks = {};
       state = getDefaultState();
+      initPreviewRowsForProduct(state.selectedProduct, state.inputWidth, state.inputSetQty);
       saveState();
       closeSettingsModal();
       renderAll();
@@ -2005,6 +2679,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      initPreviewRowsForProduct(state.selectedProduct, state.inputWidth || 3500, state.inputSetQty || 1);
       renderAll();
     });
   </script>
